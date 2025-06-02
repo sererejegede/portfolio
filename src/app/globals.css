@@ -12,32 +12,33 @@ body {
 
 @layer base {
   :root {
-    --background: 0 0% 14%; /* Dark Gray, slightly adjusted from #333333 for better harmony */
-    --foreground: 0 0% 96%; /* Light text for dark background */
+    /* Light Theme (Default) */
+    --background: 0 0% 100%; /* white */
+    --foreground: 0 0% 3.9%; /* nearly black */
 
-    --card: 0 0% 10%; /* Darker than background */
-    --card-foreground: 0 0% 96%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 3.9%;
 
-    --popover: 0 0% 7%; /* Even darker for popovers */
-    --popover-foreground: 0 0% 96%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 3.9%;
 
-    --primary: 277 52% 43%; /* #7335a6 */
+    --primary: 277 52% 43%; /* DevFolio Purple */
     --primary-foreground: 0 0% 98%; /* White text on primary */
 
-    --secondary: 0 0% 22%; /* A slightly lighter dark gray for secondary elements */
-    --secondary-foreground: 0 0% 96%; /* Light text on this secondary */
+    --secondary: 0 0% 96.1%; /* Light gray */
+    --secondary-foreground: 0 0% 9%; /* Dark text for secondary elements */
 
-    --muted: 0 0% 28%;
-    --muted-foreground: 0 0% 65%; /* Lighter gray for muted text */
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45.1%; /* Lighter gray for muted text */
 
-    --accent: 240 67% 94%; /* #E6E6FA - Lavender (Light) */
-    --accent-foreground: 277 50% 25%; /* Darker purple text on light Lavender accent for better readability */
+    --accent: 240 67% 94%; /* Lavender (Light) */
+    --accent-foreground: 277 50% 25%; /* Darker purple text on light Lavender accent */
 
-    --destructive: 0 63% 31%;
+    --destructive: 0 84.2% 60.2%; /* Standard destructive red */
     --destructive-foreground: 0 0% 98%;
 
-    --border: 0 0% 30%; /* Border color for components */
-    --input: 0 0% 20%; /* Input background, consistent with card or slightly different */
+    --border: 0 0% 89.8%; /* Light border color */
+    --input: 0 0% 93.3%; /* Light input background */
     --ring: 277 42% 53%; /* Ring focus color, related to primary */
 
     --radius: 0.5rem;
@@ -48,11 +49,43 @@ body {
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
 
-    /* Specific user colors */
-    --user-secondary-color-for-dividers: 0 0% 83%; /* #D3D3D3 */
+    --user-secondary-color-for-dividers: 0 0% 30%; /* Dark gray for dividers on light bg */
   }
 
-  /* Removed .dark class overrides as dark theme is default */
+  .dark {
+    /* Dark Theme */
+    --background: 0 0% 14%;
+    --foreground: 0 0% 96%;
+
+    --card: 0 0% 10%;
+    --card-foreground: 0 0% 96%;
+
+    --popover: 0 0% 7%;
+    --popover-foreground: 0 0% 96%;
+
+    --primary: 277 52% 43%; /* DevFolio Purple (can be same or adjusted for dark) */
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 0 0% 22%; /* A slightly lighter dark gray */
+    --secondary-foreground: 0 0% 96%;
+
+    --muted: 0 0% 28%;
+    --muted-foreground: 0 0% 65%;
+
+    --accent: 240 67% 94%; /* Lavender (Light) - stands out on dark */
+    --accent-foreground: 277 50% 25%; /* Darker purple text on Lavender accent */
+
+    --destructive: 0 63% 31%; /* Darker destructive for dark theme */
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 30%;
+    --input: 0 0% 20%;
+    --ring: 277 42% 53%;
+
+    /* Chart colors can inherit or be specifically set for dark theme */
+
+    --user-secondary-color-for-dividers: 0 0% 83%; /* Light gray for dividers on dark bg */
+  }
 }
 
 @layer base {

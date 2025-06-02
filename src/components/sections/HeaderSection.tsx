@@ -6,7 +6,7 @@ export default function HeaderSection() {
     <section id="home" className="flex min-h-[calc(100vh-var(--navbar-height,4rem))] items-center justify-center bg-background py-20 text-center">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <h1 className="font-headline text-5xl font-bold tracking-tight text-foreground sm:text-6xl md:text-7xl">
-          John Doe
+          Serere Jegede
         </h1>
         <p className="mt-6 font-headline text-2xl text-primary sm:text-3xl">
           Senior Frontend Developer

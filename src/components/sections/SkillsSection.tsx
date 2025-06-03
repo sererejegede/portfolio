@@ -1,6 +1,6 @@
 import SkillBadge from '@/components/SkillBadge';
 import { CodeXml, Palette, Parentheses, Atom, AppWindow, Layers3, FileCode2, Wind } from 'lucide-react';
-
+import Header from '@/components/ui/header';
 const skills = [
   { id: 'html', name: 'HTML5', icon: CodeXml },
   { id: 'css', name: 'CSS3', icon: Palette },
@@ -15,7 +15,7 @@ const skills = [
 export default function SkillsSection() {
   return (
     <div>
-      <h2 className="font-headline text-4xl font-bold text-primary mb-12 text-center">My Tech Stack</h2>
+      <Header level="h2">My Tech Stack</Header>
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 lg:gap-8">
         {skills.map((skill) => (
           <SkillBadge key={skill.id} name={skill.name} icon={skill.icon} />

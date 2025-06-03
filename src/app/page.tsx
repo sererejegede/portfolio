@@ -38,13 +38,13 @@ export default function Home() {
           </div>
         </section>
 
-        <Separator className="my-12 md:my-16 bg-border/50" />
+        {/* <Separator className="my-12 md:my-16 bg-border/50" />
 
         <section id="experience" className="py-16 md:py-24">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-screen-lg">
             <ExperienceSection />
           </div>
-        </section>
+        </section> */}
 
         <Separator className="my-12 md:my-16 bg-border/50" />
 
@@ -55,7 +55,7 @@ export default function Home() {
         </section>
       </main>
       <footer className="py-8 text-center text-muted-foreground border-t border-border mt-12">
-        <p>&copy; {currentYear} John Doe. All rights reserved.</p>
+        <p>&copy; {currentYear} Serere Jegede. All rights reserved.</p>
         <p className="text-sm mt-1">Built with Next.js & Tailwind CSS.</p>
       </footer>
     </div>

@@ -1,5 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Briefcase } from 'lucide-react';
+import Header from '@/components/ui/header';
 
 interface ExperienceItem {
   id: string;
@@ -13,8 +14,8 @@ const experiences: ExperienceItem[] = [
   {
     id: '1',
     role: 'Senior Frontend Developer',
-    company: 'Innovatech Solutions',
-    dates: 'Jan 2021 - Present',
+    company: 'rb2',
+    dates: 'Nov 2019 - Present',
     description: [
       'Lead development of high-traffic web applications using React, Next.js, and TypeScript.',
       'Collaborate with cross-functional teams to define, design, and ship new features.',
@@ -48,7 +49,7 @@ const experiences: ExperienceItem[] = [
 export default function ExperienceSection() {
   return (
     <div>
-      <h2 className="font-headline text-4xl font-bold text-primary mb-12 text-center">Professional Experience</h2>
+      <Header level="h2">Professional Experience</Header>
       <div className="space-y-8 relative">
         {/* Vertical line for timeline effect */}
         <div className="absolute left-0 md:left-1/2 top-0 bottom-0 w-0.5 bg-border transform md:-translate-x-1/2 hidden sm:block"></div>

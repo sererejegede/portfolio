@@ -1,4 +1,4 @@
-import Image from 'next/image';
+import Image, { StaticImageData } from 'next/image';
 import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,26 +10,20 @@ export interface Project {
   title: string;
   description: string;
   techStack: string[];
-  imageUrl: string;
-  imageHint: string;
+  image: string | StaticImageData;
   githubUrl?: string;
   liveDemoUrl?: string;
 }
 
-interface ProjectCardProps {
-  project: Project;
-}
-
-export default function ProjectCard({ project }: ProjectCardProps) {
+export default function ProjectCard({ project }: { project: Project }) {
   return (
     <Card className="flex flex-col overflow-hidden shadow-lg h-full bg-card hover:shadow-primary/20 transition-shadow duration-300">
       <div className="relative w-full h-48 sm:h-56 md:h-64">
         <Image
-          src={project.imageUrl}
+          src={project.image}
           alt={project.title}
           fill
           className="object-cover"
-          data-ai-hint={project.imageHint}
         />
       </div>
       <CardHeader>

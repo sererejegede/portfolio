@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import { Card } from '@/components/ui/card';
 import ProfilePicture from '@/assets/profile-picture.jpg';
+import Header from '@/components/ui/header';
 
 export default function AboutSection() {
   return (
@@ -18,7 +19,7 @@ export default function AboutSection() {
         </Card>
       </div>
       <div className="md:col-span-3">
-        <h2 className="font-headline text-4xl font-bold text-primary mb-6">About Me</h2>
+        <Header level="h2">About Me</Header>
         <div className="space-y-4 text-lg text-foreground/90">
           <p>
             Hello! I&apos;m Serere, a dedicated Frontend Developer with over 7 years of experience in creating dynamic and responsive web applications. My journey in web development started with a fascination for how code transforms into interactive digital experiences, and that curiosity continues to drive me today.

@@ -33,14 +33,16 @@ export default function Navbar() {
         <Link href="#home" className="flex items-center gap-2 text-xl font-headline font-semibold text-primary">
           <Image src={Logo} alt="Logo" className="h-7 w-7" />
         </Link>
-        <div className="hidden space-x-2 md:flex">
-          {navLinks.map((link) => (
-            <Button key={link.href} variant="ghost" asChild>
-              <Link href={link.href} className="font-medium text-foreground hover:text-primary">
-                {link.label}
-              </Link>
-            </Button>
-          ))}
+        <div className="flex">
+          <div className="hidden space-x-2 md:flex">
+            {navLinks.map((link) => (
+              <Button key={link.href} variant="ghost" asChild>
+                <Link href={link.href} className="font-medium text-foreground hover:text-primary">
+                  {link.label}
+                </Link>
+              </Button>
+            ))}
+          </div>
           <ThemeToggle />
         </div>
       </div>

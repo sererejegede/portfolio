@@ -2,24 +2,24 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import Header from '@/components/ui/header';
 import Image from 'next/image';
-import HeaderImage from '@/assets/header-image.png';
+import HeaderImage from '@/assets/header-image1.png';
 
 export default function HeaderSection() {
   return (
     <section id="home" className="relative flex min-h-[calc(100vh-var(--navbar-height,4rem))] items-center justify-center bg-background py-20 text-center">
-      <div className="absolute dark:inset-0">
+      <div className="absolute inset-0">
         <Image
           src={HeaderImage}
           alt="Header Image"
           fill
-          className="object-cover opacity-30"
+          className="object-cover opacity-10 dark:opacity-70"
         />
       </div>
       <div className="absolute container mx-auto px-4 sm:px-6 lg:px-8">
         <Header level="h1">
           Serere Jegede
         </Header>
-        <p className="mt-6 font-headline text-2xl text-primary sm:text-3xl">
+        <p className="mt-6 font-headline brightness-150 text-2xl text-primary sm:text-3xl">
           Senior Frontend Developer
         </p>
         <p className="mt-4 max-w-2xl mx-auto text-lg text-muted-foreground sm:text-xl">

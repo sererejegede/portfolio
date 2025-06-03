@@ -26,7 +26,7 @@ export default function ProjectCard({ project }: { project: Project }) {
           className="object-cover"
         />
       </div>
-      <CardHeader>
+      <CardHeader className="border-t border-primary">
         <CardTitle className="font-headline text-2xl text-primary">{project.title}</CardTitle>
         <CardDescription className="text-muted-foreground pt-1 h-16 overflow-hidden text-ellipsis">
           {project.description}

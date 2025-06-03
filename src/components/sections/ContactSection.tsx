@@ -27,10 +27,10 @@ export default function ContactSection() {
           </Button> */}
         </div>
         <div className="flex justify-center space-x-6 pt-4">
-          <Link href="https://github.com/johndoe" target="_blank" rel="noopener noreferrer" aria-label="GitHub Profile">
+          <Link href="https://github.com/sererejegede" target="_blank" rel="noopener noreferrer" aria-label="GitHub Profile">
             <Github className="h-8 w-8 text-muted-foreground hover:text-primary transition-colors" />
           </Link>
-          <Link href="https://linkedin.com/in/johndoe" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn Profile">
+          <Link href="https://linkedin.com/in/sererejegede" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn Profile">
             <Linkedin className="h-8 w-8 text-muted-foreground hover:text-primary transition-colors" />
           </Link>
         </div>

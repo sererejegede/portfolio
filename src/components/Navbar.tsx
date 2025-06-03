@@ -28,7 +28,7 @@ export default function Navbar() {
   }, []);
 
   return (
-    <nav className={`sticky top-0 z-50 w-full bg-[#1a1b26] backdrop-blur-md transition-shadow duration-200 ${isScrolled ? 'shadow-lg' : ''}`}>
+    <nav className={`md:sticky top-0 z-50 w-full dark:bg-[#131528] backdrop-blur-md transition-shadow duration-200 ${isScrolled ? 'shadow-lg' : ''}`}>
       <div className="container mx-auto flex items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
         <Link href="#home" className="flex items-center gap-2 text-xl font-headline font-semibold text-primary">
           <Image src={Logo} alt="Logo" className="h-7 w-7" />

@@ -7,7 +7,7 @@ import HeaderImage from '@/assets/header-image.png';
 export default function HeaderSection() {
   return (
     <section id="home" className="relative flex min-h-[calc(100vh-var(--navbar-height,4rem))] items-center justify-center bg-background py-20 text-center">
-      <div className="absolute inset-0">
+      <div className="absolute dark:inset-0">
         <Image
           src={HeaderImage}
           alt="Header Image"

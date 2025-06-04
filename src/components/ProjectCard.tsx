@@ -15,7 +15,7 @@ export interface Project {
   liveDemoUrl?: string;
 }
 
-export default function ProjectCard({ project }: { project: Project }) {
+export default function ProjectCard({ project, fitImage = false }: { project: Project, fitImage?: boolean }) {
   return (
     <Card className="flex flex-col overflow-hidden shadow-lg h-full bg-card hover:shadow-primary/20 transition-shadow duration-300">
       <div className="relative w-full h-48 sm:h-56 md:h-64">
@@ -23,7 +23,7 @@ export default function ProjectCard({ project }: { project: Project }) {
           src={project.image}
           alt={project.title}
           fill
-          className="object-cover"
+          className={fitImage ? "object-contain" : "object-cover"}
         />
       </div>
       <CardHeader className="border-t border-primary">

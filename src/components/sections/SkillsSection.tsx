@@ -14,9 +14,9 @@ const skills = [
 
 export default function SkillsSection() {
   return (
-    <div>
+    <div className="overflow-clip w-full">
       <Header level="h2">My Tech Stack</Header>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 lg:gap-8">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6 lg:gap-8 skills">
         {skills.map((skill) => (
           <SkillBadge key={skill.id} name={skill.name} icon={skill.icon} />
         ))}

@@ -12,6 +12,7 @@ const projects: Project[] = [
     techStack: ['Nuxt.js', 'Vue.js', 'TypeScript', 'TailwindCSS', 'GraphQL', 'Contentful CMS'],
     image: EuroParcsImage,
     liveDemoUrl: 'https://europarcs.com',
+    fitImage: false,
   },
   {
     id: '2',
@@ -21,6 +22,7 @@ const projects: Project[] = [
     image: WordTwistImage,
     githubUrl: 'https://github.com/sererejegede/word-twist',
     liveDemoUrl: 'https://word-twist.sererejegede.dev',
+    fitImage: true,
   },
   {
     id: '3',
@@ -29,6 +31,7 @@ const projects: Project[] = [
     techStack: ['React', 'Remix', 'Typescript', 'Prismic CMS'],
     image: WovarLogo,
     githubUrl: 'https://github.com/example/ecommerce-dashboard',
+    fitImage: true,
   },
 ];
 
@@ -38,7 +41,7 @@ export default function ProjectsSection() {
       <Header level="h2">My Recent Projects</Header>
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 projects">
         {projects.map((project) => (
-          <ProjectCard key={project.id} project={project} fitImage={project.id === '2'} />
+          <ProjectCard key={project.id} project={project} />
         ))}
       </div>
     </div>

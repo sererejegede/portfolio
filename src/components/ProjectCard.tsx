@@ -13,9 +13,10 @@ export interface Project {
   image: string | StaticImageData;
   githubUrl?: string;
   liveDemoUrl?: string;
+  fitImage: boolean;
 }
 
-export default function ProjectCard({ project, fitImage = false }: { project: Project, fitImage?: boolean }) {
+export default function ProjectCard({ project }: { project: Project }) {
   return (
     <Card className="flex flex-col overflow-hidden shadow-lg h-full bg-card hover:shadow-primary/20 transition-shadow duration-300">
       <div className="relative w-full h-48 sm:h-56 md:h-64">
@@ -23,7 +24,7 @@ export default function ProjectCard({ project, fitImage = false }: { project: Pr
           src={project.image}
           alt={project.title}
           fill
-          className={fitImage ? "object-contain" : "object-cover"}
+          className={project.fitImage ? "object-contain" : "object-cover"}
         />
       </div>
       <CardHeader className="border-t border-primary">

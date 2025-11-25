@@ -27,7 +27,7 @@ const projects: Project[] = [
   {
     id: '3',
     title: 'Wovar',
-    description: 'An analytics platform providing insights into sales, customer behavior, and product performance for online businesses.',
+    description: 'A high-traffic e-commerce platform specializing in hardware and construction supplies',
     techStack: ['React', 'Remix', 'Typescript', 'Prismic CMS'],
     image: WovarLogo,
     githubUrl: 'https://github.com/example/ecommerce-dashboard',

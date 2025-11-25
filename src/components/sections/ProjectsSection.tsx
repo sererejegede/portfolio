@@ -2,13 +2,14 @@ import ProjectCard, { type Project } from '@/components/ProjectCard';
 import Header from '@/components/ui/header';
 import EuroParcsImage from '@/assets/europarcs.jpg';
 import WordTwistImage from '@/assets/word-twist.png';
+import WovarLogo from '@/assets/wv-logo.svg';
 
 const projects: Project[] = [
   {
     id: '1',
     title: 'EuroParcs Rental',
     description: 'Holiday homes built with an advanced availability management and a robust CMS integration using Contentful.',
-    techStack: ['Nuxt.js', 'Vue.js', 'TypeScript', 'TailwindCSS', 'GraphQL'],
+    techStack: ['Nuxt.js', 'Vue.js', 'TypeScript', 'TailwindCSS', 'GraphQL', 'Contentful CMS'],
     image: EuroParcsImage,
     liveDemoUrl: 'https://europarcs.com',
   },
@@ -21,14 +22,14 @@ const projects: Project[] = [
     githubUrl: 'https://github.com/sererejegede/word-twist',
     liveDemoUrl: 'https://word-twist.sererejegede.dev',
   },
-  // {
-  //   id: '3',
-  //   title: 'E-commerce Analytics Dashboard',
-  //   description: 'An analytics platform providing insights into sales, customer behavior, and product performance for online businesses.',
-  //   techStack: ['React', 'Node.js', 'Chart.js', 'Express'],
-  //   image: 'https://placehold.co/600x400.png',
-  //   githubUrl: 'https://github.com/example/ecommerce-dashboard',
-  // },
+  {
+    id: '3',
+    title: 'Wovar',
+    description: 'An analytics platform providing insights into sales, customer behavior, and product performance for online businesses.',
+    techStack: ['React', 'Remix', 'Typescript', 'Prismic CMS'],
+    image: WovarLogo,
+    githubUrl: 'https://github.com/example/ecommerce-dashboard',
+  },
 ];
 
 export default function ProjectsSection() {

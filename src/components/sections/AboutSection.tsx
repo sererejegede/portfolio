@@ -22,7 +22,7 @@ export default function AboutSection() {
         <Header level="h2">About Me</Header>
         <div className="space-y-4 text-lg text-foreground/90">
           <p>
-            Hello! I&apos;m Serere, a dedicated Frontend Developer with over 7 years of experience in creating dynamic and responsive web applications. My journey in web development started with a fascination for how code transforms into interactive digital experiences, and that curiosity continues to drive me today.
+            Hello! I&apos;m Serere, a dedicated Frontend Developer with over 9 years of experience in creating dynamic and responsive web applications. My journey in web development started with a fascination for how code transforms into interactive digital experiences, and that curiosity continues to drive me today.
           </p>
           <p>
             I specialize in JavaScript, TypeScript, and modern frontend frameworks like Nuxt (Vue) and Next.js (React). I&apos;m passionate about writing clean, efficient, and maintainable code, and I strongly believe in the power of good design to enhance usability.

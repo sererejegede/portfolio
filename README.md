@@ -56,5 +56,4 @@ src/
   app/          Next.js App Router pages and layout
   components/   UI components and page sections
   assets/       Images and logos
-  ai/           Genkit AI flows
 ```

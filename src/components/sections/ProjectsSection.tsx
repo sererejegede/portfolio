@@ -3,6 +3,7 @@ import Header from '@/components/ui/header';
 import EuroParcsImage from '@/assets/europarcs.jpg';
 import WordTwistImage from '@/assets/word-twist.png';
 import WovarLogo from '@/assets/wv-logo.svg';
+import TailorsLedgerImage from '@/assets/tailors-ledger.png';
 
 const projects: Project[] = [
   {
@@ -31,6 +32,15 @@ const projects: Project[] = [
     techStack: ['React', 'Remix', 'Typescript', 'Prismic CMS'],
     image: WovarLogo,
     githubUrl: 'https://github.com/example/ecommerce-dashboard',
+    fitImage: true,
+  },
+  {
+    id: '4',
+    title: "Tailor's Ledger",
+    description: 'An offline-first mobile app that replaces the paper measurement card, letting tailors capture client measurements as fast as pen and paper, with self-built sync to a Postgres backend.',
+    techStack: ['React Native', 'Expo', 'TypeScript', 'WatermelonDB', 'Hono', 'Supabase', 'Postgres'],
+    image: TailorsLedgerImage,
+    liveDemoUrl: 'https://tailors-ledger.vercel.app',
     fitImage: true,
   },
 ];

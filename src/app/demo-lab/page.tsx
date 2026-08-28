@@ -12,10 +12,16 @@
 import { useState } from 'react';
 import DemoFrame from '@/components/demos/DemoFrame';
 import type { DemoAnnotation, DemoDevice } from '@/components/demos/DemoFrame';
-import { MEASUREMENT_FIELDS, formatInches, INCH_MARK } from '@/components/demos/tailors-ledger/data';
 import {
-  canStep,
-  MAX_QUEUE,
+  MEASUREMENT_FIELDS,
+  SCRIPT,
+  formatInches,
+  INCH_MARK,
+} from '@/components/demos/tailors-ledger/data';
+import {
+  canSync,
+  isCycleComplete,
+  isScriptRunning,
   useSyncSimulation,
 } from '@/components/demos/tailors-ledger/useSyncSimulation';
 
@@ -46,55 +52,51 @@ export default function DemoLabPage() {
  * ------------------------------------------------------------------ */
 
 function ReducerHarness() {
-  const { state, toggleConnection, addMeasurement, reset, fields } = useSyncSimulation();
+  const { state, toggleConnection, startSync, reset, fields } = useSyncSimulation();
 
   return (
     <section>
       <h1 className="mb-1 font-headline text-2xl">Step 4 — sync reducer</h1>
       <p className="mb-6 text-sm text-muted-foreground">
-        Plain buttons, no animation. Verifying the state machine before any motion exists.
+        Plain buttons, no animation. Two real controls; the measurements play back from a script.
       </p>
 
       <div className="mb-6 flex flex-wrap items-center gap-2">
         <button type="button" onClick={toggleConnection} className={btn}>
           Toggle airplane mode
         </button>
-        {fields.map(({ field, value }) => (
-          <span key={field} className="inline-flex items-center gap-1">
-            <button
-              type="button"
-              onClick={() => addMeasurement(field, -1)}
-              disabled={!canStep(state, field, -1)}
-              className={btn}
-            >
-              −
-            </button>
-            <span className="min-w-[9.5rem] text-center font-code text-sm">
-              {field} {formatInches(value)}
-              {INCH_MARK}
-            </span>
-            <button
-              type="button"
-              onClick={() => addMeasurement(field, 1)}
-              disabled={!canStep(state, field, 1)}
-              className={btn}
-            >
-              +
-            </button>
-          </span>
-        ))}
-        <button type="button" onClick={reset} className={btn}>
-          Reset
+        <button type="button" onClick={startSync} disabled={!canSync(state)} className={btn}>
+          Sync {state.queue.length > 0 ? `(${state.queue.length})` : ''}
         </button>
+        <button type="button" onClick={reset} className={btn}>
+          Replay
+        </button>
+        <span className="ml-4 font-code text-sm text-muted-foreground">
+          {fields
+            .map(({ field, value }) => `${field} ${formatInches(value)}${INCH_MARK}`)
+            .join('   ·   ')}
+        </span>
       </div>
 
       <dl className="mb-6 grid grid-cols-2 gap-x-6 gap-y-1 font-code text-sm sm:grid-cols-4">
         <dt className="text-muted-foreground">connection</dt>
         <dd>{state.connection}</dd>
+        <dt className="text-muted-foreground">sync</dt>
+        <dd>{state.sync}</dd>
         <dt className="text-muted-foreground">queue</dt>
+        <dd>[{state.queue.join(', ')}]</dd>
+        <dt className="text-muted-foreground">activeField</dt>
+        <dd>{state.activeField ?? '—'}</dd>
+        <dt className="text-muted-foreground">script</dt>
         <dd>
-          [{state.queue.join(', ')}] ({state.queue.length}/{MAX_QUEUE})
+          {state.scriptStep}/{SCRIPT.length} {state.scriptStarted ? '(started)' : '(idle)'}
         </dd>
+        <dt className="text-muted-foreground">canSync</dt>
+        <dd>{String(canSync(state))}</dd>
+        <dt className="text-muted-foreground">scriptRunning</dt>
+        <dd>{String(isScriptRunning(state))}</dd>
+        <dt className="text-muted-foreground">cycleComplete</dt>
+        <dd>{String(isCycleComplete(state))}</dd>
         <dt className="text-muted-foreground">hasSynced</dt>
         <dd>{String(state.hasSynced)}</dd>
         <dt className="text-muted-foreground">hasInteracted</dt>

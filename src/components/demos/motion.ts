@@ -74,6 +74,21 @@ export const DRAIN_INTERVAL_MS = 250;
 /** Idle delay before the airplane switch pulses its one-time hint, in ms. */
 export const IDLE_HINT_DELAY_MS = 3000;
 
+/* --- Scripted measurement playback ---------------------------------- *
+ * The visitor does not enter measurements; the demo plays them back. These
+ * three numbers set that pace. Commit-to-commit is GAP + FOCUS = 700ms, which
+ * reads as deliberate entry rather than three values blurring into one event.
+ */
+
+/** Flipping to offline, to the first row lighting up. Lets the pill land first. */
+export const SCRIPT_LEAD_IN_MS = 400;
+
+/** How long a row stays lit before its new value commits. */
+export const SCRIPT_FOCUS_MS = 250;
+
+/** From one value committing to the next row lighting up. */
+export const SCRIPT_GAP_MS = 450;
+
 /* ------------------------------------------------------------------ *
  * Variants
  * ------------------------------------------------------------------ */

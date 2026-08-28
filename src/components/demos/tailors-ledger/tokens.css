@@ -1,0 +1,132 @@
+/* =============================================================================
+ * Tailor's Ledger — design token snapshot
+ *
+ *   Source repo   : github.com/sererejegede/tailors-ledger-app
+ *   Source file   : docs/tailor-app-wireframe.html  (the `:root` block)
+ *   Source commit : 09916c8e6c28b19da325b605f61893e1dbd6b26b  ("Set up Android
+ *                   dev-build path + handoff docs", 2026-06-21)
+ *   Copied on     : 2026-08-28
+ *
+ * This is a ONE-TIME SNAPSHOT. It does not track the source and it will drift.
+ * Nothing here is imported from the Tailor's Ledger repo at build time.
+ *
+ * Honest caveat, so future-me does not misremember: at the time of copying, the
+ * Tailor's Ledger app ships no UI — `tailors-ledger-app/src` contains only the
+ * WatermelonDB schema, models and seed data. The wireframe is therefore the
+ * product's real design source of truth, but it is not a shipped app's token
+ * file. The LIGHT ramp below is verbatim from it. The DARK ramp does not exist
+ * upstream and was derived here for the portfolio (see note above `.dark`).
+ *
+ * Scoping: everything is namespaced under `.tl-demo` and prefixed `--tl-`, so it
+ * cannot leak into the rest of the portfolio. Nothing is defined on `:root`.
+ * ============================================================================= */
+
+.tl-demo {
+  /* ---- surfaces (verbatim) ---------------------------------------------- */
+  --tl-paper: #dcdad4; /* the desk the phone sits on */
+  --tl-screen: #fcfbf8; /* app background */
+  --tl-surface: #ffffff; /* rows, cards, keys — literal #fff upstream */
+  --tl-dock: #fbf8f1; /* docked number-pad tray */
+  --tl-bezel: #15140f; /* device chrome */
+
+  /* ---- ink (verbatim) --------------------------------------------------- */
+  --tl-ink: #1b1a17;
+  --tl-muted: #8c887e;
+  --tl-faint: #b6b1a6;
+
+  /* ---- rules (verbatim) ------------------------------------------------- */
+  --tl-line: #e2ded5;
+  --tl-line-2: #d2cdc2;
+
+  /* ---- accent (verbatim) ------------------------------------------------ */
+  --tl-accent: #bd7a16;
+  --tl-accent-hover: #a96c10;
+  --tl-accent-tint: #f5ead3;
+  --tl-accent-ink: #794d08;
+  --tl-tint-border: #e6d2a8;
+  --tl-on-accent: #ffffff;
+
+  /* ---- semantic state -----------------------------------------------------
+   * Offline is a fully supported state, not an error (brief §4, Beat 1), so it
+   * gets the app's own amber tint — never red. Online/synced is deliberately the
+   * calmest thing on screen: plain ink on plain surface. The palette upstream has
+   * no green and none was invented; pending vs synced is carried by SHAPE
+   * (hollow ring vs drawn check), with colour only reinforcing it.
+   * ------------------------------------------------------------------------ */
+  --tl-calm-bg: var(--tl-surface);
+  --tl-calm-fg: var(--tl-ink);
+  --tl-calm-border: var(--tl-line-2);
+
+  --tl-pending-bg: var(--tl-accent-tint);
+  --tl-pending-fg: var(--tl-accent-ink);
+  --tl-pending-border: var(--tl-tint-border);
+
+  --tl-focus-ring: var(--tl-accent);
+
+  /* ---- type (verbatim) --------------------------------------------------- */
+  --tl-font-display: 'Space Grotesk', system-ui, sans-serif;
+  --tl-font-ui: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --tl-font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+
+  /* Type scale, lifted from the sizes the wireframe's client/set screens use. */
+  --tl-text-micro: 9.5px; /* uppercase mono section labels */
+  --tl-text-meta: 10.5px; /* mono metadata under a row */
+  --tl-text-sm: 12.5px;
+  --tl-text-base: 14px; /* measurement row key */
+  --tl-text-value: 15px; /* mono measurement value */
+  --tl-text-lg: 17px; /* topbar title */
+  --tl-text-title: 19px; /* set-detail label */
+
+  --tl-tracking-label: 0.14em;
+
+  /* ---- radii (verbatim) --------------------------------------------------- */
+  --tl-radius-xs: 3px;
+  --tl-radius-sm: 7px;
+  --tl-radius-md: 9px;
+  --tl-radius-lg: 11px;
+  --tl-radius-pill: 20px;
+  --tl-radius-device: 42px;
+
+  /* ---- spacing (verbatim: 16px gutter, 11–13px row padding) --------------- */
+  --tl-space-1: 4px;
+  --tl-space-2: 8px;
+  --tl-space-3: 11px;
+  --tl-space-4: 13px;
+  --tl-gutter: 16px;
+
+  --tl-device-shadow: 0 24px 60px -28px rgba(20, 18, 12, 0.55);
+}
+
+/* =============================================================================
+ * Dark ramp — DERIVED, NOT COPIED.
+ *
+ * The wireframe is light-only; there is no upstream dark palette to snapshot.
+ * These values keep the source's warm-paper character (every neutral stays on a
+ * warm axis rather than going blue-grey) and lift the accent so it clears 4.5:1
+ * on the dark screen. Measured against the dark screen (#1c1a16):
+ *   ink 15.1:1 · muted 6.7:1 · accent 7.8:1 · accent-ink 9.5:1 · faint 3.4:1
+ * ============================================================================= */
+
+.dark .tl-demo {
+  --tl-paper: #14130f;
+  --tl-screen: #1c1a16;
+  --tl-surface: #26241e;
+  --tl-dock: #211f19;
+  --tl-bezel: #0a0907;
+
+  --tl-ink: #f2efe7;
+  --tl-muted: #a5a093;
+  --tl-faint: #736e62;
+
+  --tl-line: #2e2b24;
+  --tl-line-2: #565044;
+
+  --tl-accent: #e0a244;
+  --tl-accent-hover: #f0b65e;
+  --tl-accent-tint: #3a2e14;
+  --tl-accent-ink: #e9b85f;
+  --tl-tint-border: #5c4a22;
+  --tl-on-accent: #1b1a17;
+
+  --tl-device-shadow: 0 24px 60px -28px rgba(0, 0, 0, 0.8);
+}

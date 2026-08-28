@@ -14,7 +14,7 @@
  */
 
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
-import type { ReactNode } from 'react';
+import type { ReactNode, RefObject } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -39,8 +39,65 @@ const DemoStageContext = createContext<DemoStage>({
   reducedMotion: false,
 });
 
+/** Read the stage from anywhere inside a `DemoFrame`. */
 export function useDemoStage(): DemoStage {
   return useContext(DemoStageContext);
+}
+
+/**
+ * Create the stage. A demo calls this itself and hands the result to
+ * `DemoFrame`, rather than the frame owning it privately.
+ *
+ * The reason is ordering: a demo's simulation needs `isRunning` to gate its
+ * timers, but the frame needs that same simulation's state to know which
+ * annotation to show. If the frame owned the observer, the demo could only
+ * reach it from inside the frame's own subtree - too late to compute the props
+ * the frame is being given. Owning it here breaks the cycle with no magic.
+ */
+export function useDemoStageState(): {
+  containerRef: RefObject<HTMLElement>;
+  stage: DemoStage;
+} {
+  const containerRef = useRef<HTMLElement>(null);
+  const [isOnScreen, setIsOnScreen] = useState(false);
+  const [isTabVisible, setIsTabVisible] = useState(true);
+
+  const prefersReduced = useReducedMotion();
+  const reducedMotion = prefersReduced === true;
+
+  // Pause when scrolled away. Any intersection counts as on-screen: a portrait
+  // phone can be taller than a short viewport, so a fractional threshold would
+  // never fire there.
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    if (typeof IntersectionObserver === 'undefined') {
+      setIsOnScreen(true);
+      return;
+    }
+    const observer = new IntersectionObserver(
+      (entries) => setIsOnScreen(entries.some((entry) => entry.isIntersecting)),
+      { threshold: 0 },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  // Intersection alone is not enough: a demo scrolled into view in a tab the
+  // visitor has switched away from is still "intersecting".
+  useEffect(() => {
+    const readVisibility = () => setIsTabVisible(!document.hidden);
+    readVisibility();
+    document.addEventListener('visibilitychange', readVisibility);
+    return () => document.removeEventListener('visibilitychange', readVisibility);
+  }, []);
+
+  const stage = useMemo<DemoStage>(
+    () => ({ isRunning: isOnScreen && isTabVisible, reducedMotion }),
+    [isOnScreen, isTabVisible, reducedMotion],
+  );
+
+  return { containerRef, stage };
 }
 
 /* ------------------------------------------------------------------ *
@@ -55,6 +112,9 @@ export interface DemoAnnotation {
 }
 
 export interface DemoFrameProps {
+  /** From `useDemoStageState`, which the demo owns. See the note on that hook. */
+  stage: DemoStage;
+  containerRef: RefObject<HTMLElement>;
   /** `phone` is portrait; `browser` is landscape with a title bar. */
   device: DemoDevice;
   /** Accessible name for the whole demo region. */
@@ -84,6 +144,8 @@ export interface DemoFrameProps {
  * ------------------------------------------------------------------ */
 
 export default function DemoFrame({
+  stage,
+  containerRef,
   device,
   label,
   annotations,
@@ -96,52 +158,13 @@ export default function DemoFrame({
   children,
   className,
 }: DemoFrameProps) {
-  const rootRef = useRef<HTMLElement | null>(null);
-  const [isOnScreen, setIsOnScreen] = useState(false);
-  const [isTabVisible, setIsTabVisible] = useState(true);
-
-  const prefersReduced = useReducedMotion();
-  const reducedMotion = prefersReduced === true;
-
-  // Pause when scrolled away. Any intersection counts as on-screen: a portrait
-  // phone can be taller than a short viewport, so a fractional threshold would
-  // never fire there.
-  useEffect(() => {
-    const el = rootRef.current;
-    if (!el) return;
-    if (typeof IntersectionObserver === 'undefined') {
-      setIsOnScreen(true);
-      return;
-    }
-    const observer = new IntersectionObserver(
-      (entries) => setIsOnScreen(entries.some((entry) => entry.isIntersecting)),
-      { threshold: 0 },
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, []);
-
-  // Intersection alone is not enough: a demo scrolled into view in a tab the
-  // visitor has switched away from is still "intersecting".
-  useEffect(() => {
-    const readVisibility = () => setIsTabVisible(!document.hidden);
-    readVisibility();
-    document.addEventListener('visibilitychange', readVisibility);
-    return () => document.removeEventListener('visibilitychange', readVisibility);
-  }, []);
-
-  const stage = useMemo<DemoStage>(
-    () => ({ isRunning: isOnScreen && isTabVisible, reducedMotion }),
-    [isOnScreen, isTabVisible, reducedMotion],
-  );
-
   const activeAnnotation =
     annotations.find((annotation) => annotation.id === activeAnnotationId) ?? null;
 
   return (
     <DemoStageContext.Provider value={stage}>
       <section
-        ref={rootRef}
+        ref={containerRef}
         aria-label={label}
         className={cn(
           'grid items-center gap-8 lg:grid-cols-[auto_minmax(0,1fr)] lg:gap-12',
@@ -179,7 +202,12 @@ export default function DemoFrame({
             </div>
 
             <div className="absolute inset-0 grid">
-              <AnimatePresence mode="wait" initial={false}>
+              {/* Default (sync) mode, not `wait`: with `wait`, a caption going to
+                  none has nothing to swap to, and the exiting node was left in
+                  the DOM at opacity 0 — invisible, but still read by a screen
+                  reader. Sync mode removes it, and crossfading the captions in
+                  one grid cell is what §11.4 asks for anyway. */}
+              <AnimatePresence initial={false}>
                 {activeAnnotation && (
                   <motion.p
                     key={activeAnnotation.id}

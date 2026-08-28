@@ -1,29 +1,33 @@
 'use client';
 
 /**
- * Scratch route for building the demos (brief §12, steps 3-4). Not linked from
- * anywhere and not part of the portfolio proper - it exists so each layer can be
- * verified on its own before the next one is stacked on top.
+ * Scratch route for building the demos (brief §12). Not linked from anywhere and
+ * not part of the portfolio proper - it exists so each layer can be verified on
+ * its own before the next one is stacked on top.
  *
  * Step 3: DemoFrame with static children.
- * Step 4: the reducer, driven by plain buttons, with no animation anywhere.
+ * Step 4: the reducer, driven by plain buttons, with no animation.
+ * Step 5: the real screen wired to the reducer, still with no animation.
  */
 
-import { useState } from 'react';
-import DemoFrame from '@/components/demos/DemoFrame';
+import { useMemo, useState } from 'react';
+import DemoFrame, { useDemoStageState } from '@/components/demos/DemoFrame';
 import type { DemoAnnotation, DemoDevice } from '@/components/demos/DemoFrame';
-import {
-  MEASUREMENT_FIELDS,
-  SCRIPT,
-  formatInches,
-  INCH_MARK,
-} from '@/components/demos/tailors-ledger/data';
+import OfflineSyncDemo, {
+  ANNOTATIONS as DEMO_ANNOTATIONS,
+  activeAnnotationId,
+  pillState,
+} from '@/components/demos/tailors-ledger/OfflineSyncDemo';
+import { SCRIPT, formatInches, INCH_MARK } from '@/components/demos/tailors-ledger/data';
 import {
   canSync,
+  initialState,
   isCycleComplete,
   isScriptRunning,
+  syncReducer,
   useSyncSimulation,
 } from '@/components/demos/tailors-ledger/useSyncSimulation';
+import type { SyncAction } from '@/components/demos/tailors-ledger/useSyncSimulation';
 
 const ANNOTATIONS: DemoAnnotation[] = [
   { id: 'a', text: 'Connection lost — the app does not care' },
@@ -40,10 +44,108 @@ const btnOn = 'rounded border border-primary bg-primary px-3 py-1 text-sm text-p
 export default function DemoLabPage() {
   return (
     <main className="container mx-auto max-w-screen-xl space-y-16 px-4 py-16">
+      <section>
+        <h1 className="mb-1 font-headline text-2xl">Step 5 — the demo screen</h1>
+        <p className="mb-8 text-sm text-muted-foreground">
+          Wired to the reducer. No motion yet.
+        </p>
+        <OfflineSyncDemo />
+      </section>
+
+      <hr className="border-border" />
+      <BeatMap />
+      <hr className="border-border" />
       <ReducerHarness />
       <hr className="border-border" />
       <FrameSmokeTest />
     </main>
+  );
+}
+
+/* ------------------------------------------------------------------ *
+ * Beat map - the whole sequence folded through the reducer synchronously
+ *
+ * No timers, no rAF, no IntersectionObserver. This is the one view of the demo
+ * that can be verified in an environment that produces no frames, and it is
+ * also the clearest statement of which beat produces which pill and caption.
+ * ------------------------------------------------------------------ */
+
+const CANONICAL_RUN: Array<{ label: string; action: SyncAction | null }> = [
+  { label: 'Beat 0 — idle', action: null },
+  { label: 'Beat 1 — airplane mode on', action: { type: 'TOGGLE_CONNECTION' } },
+  { label: 'Chest row lights', action: { type: 'FOCUS_FIELD' } },
+  { label: 'Beat 3 — Chest commits', action: { type: 'COMMIT_FIELD' } },
+  { label: 'Sleeve row lights', action: { type: 'FOCUS_FIELD' } },
+  { label: 'Sleeve commits', action: { type: 'COMMIT_FIELD' } },
+  { label: 'Waist row lights', action: { type: 'FOCUS_FIELD' } },
+  { label: 'Beat 4 — Waist commits', action: { type: 'COMMIT_FIELD' } },
+  { label: 'Beat 5 — airplane mode off', action: { type: 'TOGGLE_CONNECTION' } },
+  { label: 'Tailor taps Sync', action: { type: 'START_SYNC' } },
+  { label: 'push 1 of 3', action: { type: 'DRAIN_ONE' } },
+  { label: 'push 2 of 3', action: { type: 'DRAIN_ONE' } },
+  { label: 'Beat 5 end — push 3 of 3', action: { type: 'DRAIN_ONE' } },
+  { label: 'Beat 6 — Replay', action: { type: 'RESET' } },
+];
+
+function BeatMap() {
+  const rows = useMemo(() => {
+    let state = initialState();
+    return CANONICAL_RUN.map(({ label, action }) => {
+      if (action) state = syncReducer(state, action);
+      const annotationId = activeAnnotationId(state);
+      return {
+        label,
+        connection: state.connection,
+        sync: state.sync,
+        queue: state.queue.length,
+        active: state.activeField ?? '—',
+        canSync: canSync(state),
+        pill: pillState(state),
+        caption: DEMO_ANNOTATIONS.find((a) => a.id === annotationId)?.text ?? '—',
+      };
+    });
+  }, []);
+
+  return (
+    <section>
+      <h2 className="mb-1 font-headline text-2xl">Beat map</h2>
+      <p className="mb-6 text-sm text-muted-foreground">
+        The canonical run, folded through the reducer with no timers.
+      </p>
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse font-code text-xs">
+          <thead>
+            <tr className="border-b border-border text-left text-muted-foreground">
+              <th className="py-1 pr-4 font-normal">step</th>
+              <th className="py-1 pr-4 font-normal">conn</th>
+              <th className="py-1 pr-4 font-normal">sync</th>
+              <th className="py-1 pr-4 font-normal">queue</th>
+              <th className="py-1 pr-4 font-normal">active row</th>
+              <th className="py-1 pr-4 font-normal">canSync</th>
+              <th className="py-1 pr-4 font-normal">pill</th>
+              <th className="py-1 font-normal">caption</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r) => (
+              <tr key={r.label} className="border-b border-border/40">
+                <td className="whitespace-nowrap py-1 pr-4">{r.label}</td>
+                <td className="py-1 pr-4">{r.connection}</td>
+                <td className="py-1 pr-4">{r.sync}</td>
+                <td className="py-1 pr-4">{r.queue}</td>
+                <td className="py-1 pr-4">{r.active}</td>
+                <td className="py-1 pr-4">{String(r.canSync)}</td>
+                <td className="whitespace-nowrap py-1 pr-4">
+                  {r.pill.label}{' '}
+                  <span className="text-muted-foreground">[{r.pill.tone}]</span>
+                </td>
+                <td className="py-1">{r.caption}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
   );
 }
 
@@ -56,9 +158,9 @@ function ReducerHarness() {
 
   return (
     <section>
-      <h1 className="mb-1 font-headline text-2xl">Step 4 — sync reducer</h1>
+      <h2 className="mb-1 font-headline text-2xl">Step 4 — sync reducer</h2>
       <p className="mb-6 text-sm text-muted-foreground">
-        Plain buttons, no animation. Two real controls; the measurements play back from a script.
+        Plain buttons. Two real controls; the measurements play back from a script.
       </p>
 
       <div className="mb-6 flex flex-wrap items-center gap-2">
@@ -134,9 +236,6 @@ function ReducerHarness() {
           ))}
         </tbody>
       </table>
-      <p className="mt-2 text-xs text-muted-foreground">
-        Fields in template order: {MEASUREMENT_FIELDS.join(' · ')}
-      </p>
     </section>
   );
 }
@@ -148,6 +247,7 @@ function ReducerHarness() {
 function FrameSmokeTest() {
   const [device, setDevice] = useState<DemoDevice>('phone');
   const [active, setActive] = useState<string | null>(null);
+  const { containerRef, stage } = useDemoStageState();
 
   return (
     <section>
@@ -182,6 +282,8 @@ function FrameSmokeTest() {
       </div>
 
       <DemoFrame
+        stage={stage}
+        containerRef={containerRef}
         device={device}
         label="Frame smoke test"
         annotations={ANNOTATIONS}

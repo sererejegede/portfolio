@@ -48,10 +48,16 @@
 
   /* ---- semantic state -----------------------------------------------------
    * Offline is a fully supported state, not an error (brief §4, Beat 1), so it
-   * gets the app's own amber tint — never red. Online/synced is deliberately the
-   * calmest thing on screen: plain ink on plain surface. The palette upstream has
-   * no green and none was invented; pending vs synced is carried by SHAPE
-   * (hollow ring vs drawn check), with colour only reinforcing it.
+   * gets the app's own amber tint — never red.
+   *
+   * The tone tracks WHETHER THERE IS UNPUSHED WORK, not connectivity. Sync in
+   * this app is a deliberate act, so a device that is online with three changes
+   * still waiting to be pushed is every bit as "pending" as an offline one.
+   * Calm — plain ink on plain surface — is reserved for genuinely nothing left
+   * to do, and is deliberately the quietest thing on screen.
+   *
+   * The palette upstream has no green and none was invented; pending vs synced
+   * is carried by SHAPE (hollow ring vs drawn check), colour only reinforces it.
    * ------------------------------------------------------------------------ */
   --tl-calm-bg: var(--tl-surface);
   --tl-calm-fg: var(--tl-ink);

@@ -124,10 +124,10 @@ export default function DemoFrame({
   // Intersection alone is not enough: a demo scrolled into view in a tab the
   // visitor has switched away from is still "intersecting".
   useEffect(() => {
-    const sync = () => setIsTabVisible(!document.hidden);
-    sync();
-    document.addEventListener('visibilitychange', sync);
-    return () => document.removeEventListener('visibilitychange', sync);
+    const readVisibility = () => setIsTabVisible(!document.hidden);
+    readVisibility();
+    document.addEventListener('visibilitychange', readVisibility);
+    return () => document.removeEventListener('visibilitychange', readVisibility);
   }, []);
 
   const stage = useMemo<DemoStage>(

@@ -93,14 +93,15 @@ export const SCRIPT_GAP_MS = 450;
  * Variants
  * ------------------------------------------------------------------ */
 
-/** Connection pill. Colour is a token swap; only opacity crossfades. */
-export const pillVariants: Variants = {
-  online: { opacity: 1, transition: easeColor },
-  offline: { opacity: 1, transition: easeColor },
-  syncing: { opacity: 1, transition: easeColor },
-};
-
-/** Pill label swap — crossfade in place, no slide. */
+/**
+ * Pill label swap — crossfade in place, no slide.
+ *
+ * There is no `pillVariants` companion to this on purpose. The pill has no
+ * transform to animate: its colour is a token swap that CSS transitions over
+ * `easeColor`'s duration, and its width change is handled by Framer Motion's
+ * `layout` prop rather than an animated `width`, which would thrash layout every
+ * frame (brief §6). All that is left for a variant to do is this crossfade.
+ */
 export const pillLabelVariants: Variants = {
   initial: { opacity: 0 },
   animate: { opacity: 1, transition: easeColor },

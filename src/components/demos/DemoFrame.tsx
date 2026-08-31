@@ -15,7 +15,7 @@
 
 import { createContext, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode, RefObject } from 'react';
-import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
+import { AnimatePresence, motion, useReducedMotionConfig } from 'motion/react';
 import { RotateCcw } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { annotationVariants } from './motion';
@@ -62,8 +62,11 @@ export function useDemoStageState(): {
   const [isOnScreen, setIsOnScreen] = useState(false);
   const [isTabVisible, setIsTabVisible] = useState(true);
 
-  const prefersReduced = useReducedMotion();
-  const reducedMotion = prefersReduced === true;
+  // `useReducedMotionConfig` rather than `useReducedMotion`: it honours the OS
+  // preference exactly the same way, but also lets an enclosing `<MotionConfig
+  // reducedMotion>` force it — which is what makes the §7 path testable without
+  // asking a reviewer to change their system settings.
+  const reducedMotion = useReducedMotionConfig() === true;
 
   // Pause when scrolled away. Any intersection counts as on-screen: a portrait
   // phone can be taller than a short viewport, so a fractional threshold would

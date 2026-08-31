@@ -19,10 +19,25 @@
  * is faithful - most importantly that connectivity never triggers a push.
  */
 
-import { useMemo } from 'react';
-import DemoFrame, { useDemoStageState } from '../DemoFrame';
+import { useEffect, useMemo, useState } from 'react';
+import { AnimatePresence, motion } from 'motion/react';
+import type { Variants } from 'motion/react';
+import DemoFrame, { useDemoStage, useDemoStageState } from '../DemoFrame';
 import type { DemoAnnotation } from '../DemoFrame';
 import { cn } from '@/lib/utils';
+import {
+  IDLE_HINT_DELAY_MS,
+  badgeVariants,
+  easeCheckDraw,
+  easeColor,
+  easeRingCollapse,
+  hintPulseVariants,
+  pillLabelVariants,
+  rowVariants,
+  springBadge,
+  springThumb,
+  withoutTransforms,
+} from '../motion';
 import { CLIENT, INCH_MARK, formatInches } from './data';
 import type { SyncRecord } from './data';
 import {
@@ -84,6 +99,26 @@ export function activeAnnotationId(state: SyncState): string | null {
   if (state.queue.length > 0) return 'written';
   if (state.connection === 'offline') return 'offline';
   return null;
+}
+
+/** The "No changes yet." placeholder. Fade only — it has nowhere to slide from. */
+const emptyVariants: Variants = {
+  initial: { opacity: 0 },
+  animate: { opacity: 1, transition: { duration: 0.2 } },
+  exit: { opacity: 0, transition: { duration: 0.12 } },
+};
+
+/**
+ * Reduced motion keeps the SEQUENCING and drops the transforms (brief §7): the
+ * queue still drains one row at a time — that ordering is what carries the
+ * meaning — but nothing slides, scales or draws.
+ */
+function useMotionVariants(variants: Variants): Variants {
+  const { reducedMotion } = useDemoStage();
+  return useMemo(
+    () => (reducedMotion ? withoutTransforms(variants) : variants),
+    [reducedMotion, variants],
+  );
 }
 
 /* ------------------------------------------------------------------ *
@@ -162,19 +197,29 @@ export default function OfflineSyncDemo() {
           aria-labelledby="tl-changes-label"
           className="min-h-0 flex-1 overflow-y-auto border-t border-[var(--tl-line)]"
         >
-          {changes.length === 0 ? (
-            <li className="px-4 py-6 text-center text-[13px] text-[var(--tl-muted)]">
-              No changes yet.
-            </li>
-          ) : (
-            changes.map((record) => (
-              <ChangeRow
-                key={record.id}
-                record={record}
-                previous={previousValue(state, record)}
-              />
-            ))
-          )}
+          <AnimatePresence initial={false} mode="popLayout">
+            {changes.length === 0 ? (
+              <motion.li
+                key="empty"
+                layout
+                variants={emptyVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                className="px-4 py-6 text-center text-[13px] text-[var(--tl-muted)]"
+              >
+                No changes yet.
+              </motion.li>
+            ) : (
+              changes.map((record) => (
+                <ChangeRow
+                  key={record.id}
+                  record={record}
+                  previous={previousValue(state, record)}
+                />
+              ))
+            )}
+          </AnimatePresence>
         </ul>
 
         <SyncBar
@@ -218,24 +263,36 @@ function MeasurementRow({
   value: number | null;
   active: boolean;
 }) {
+  const { reducedMotion } = useDemoStage();
   return (
     <li
       className={cn(
         'relative flex items-center justify-between border-b border-[var(--tl-line)] px-4 py-3',
+        // Colour only. Nothing bouncy on a colour change (brief §6).
+        'transition-colors duration-200',
         active && 'bg-[var(--tl-accent-tint)]',
       )}
     >
-      {/* The wireframe's active-row treatment: a 3px accent bar on the left. */}
-      {active && (
-        <span
-          aria-hidden
-          className="absolute left-0 top-0 h-full w-[3px] bg-[var(--tl-accent-stroke)]"
-        />
-      )}
+      {/* The wireframe's active-row treatment: a 3px accent bar on the left.
+          It wipes in from the top on `scaleY` — a transform, so no layout. */}
+      <AnimatePresence initial={false}>
+        {active && (
+          <motion.span
+            key="bar"
+            aria-hidden
+            initial={reducedMotion ? { opacity: 1 } : { scaleY: 0 }}
+            animate={reducedMotion ? { opacity: 1 } : { scaleY: 1 }}
+            exit={reducedMotion ? { opacity: 0 } : { scaleY: 0 }}
+            transition={reducedMotion ? { duration: 0 } : { duration: 0.18, ease: 'easeOut' }}
+            style={{ originY: 0 }}
+            className="absolute left-0 top-0 h-full w-[3px] bg-[var(--tl-accent-stroke)]"
+          />
+        )}
+      </AnimatePresence>
       <span className={cn('text-[14px]', active && 'font-semibold')}>{field}</span>
       <span
         className={cn(
-          'text-[15px] tabular-nums',
+          'text-[15px] tabular-nums transition-colors duration-200',
           active ? 'font-semibold text-[var(--tl-accent-ink)]' : 'text-[var(--tl-ink)]',
         )}
         style={{ fontFamily: 'var(--tl-font-ui)' }}
@@ -255,8 +312,16 @@ function ChangeRow({
   previous: number | null;
 }) {
   const pending = record.status === 'pending';
+  const variants = useMotionVariants(rowVariants);
   return (
-    <li
+    // `layout` so the rows already in the list slide down as a new one inserts,
+    // rather than teleporting (brief §6).
+    <motion.li
+      layout
+      variants={variants}
+      initial="initial"
+      animate="animate"
+      exit="exit"
       className={cn(
         'flex items-center gap-3 border-b border-[var(--tl-line)] px-4 py-2.5',
         pending && 'opacity-90',
@@ -279,7 +344,7 @@ function ChangeRow({
           {INCH_MARK}
         </span>
       </span>
-    </li>
+    </motion.li>
   );
 }
 
@@ -288,26 +353,45 @@ function ChangeRow({
  * versus a drawn check. Colour only reinforces it.
  */
 function StatusMark({ pending }: { pending: boolean }) {
+  const { reducedMotion } = useDemoStage();
   return (
     <>
       <span className="sr-only">{pending ? 'Not yet synced' : 'Synced'}</span>
-      {pending ? (
-        <span
-          aria-hidden
-          className="h-3.5 w-3.5 shrink-0 rounded-full border-2 border-[var(--tl-accent)]"
-        />
-      ) : (
-        <svg aria-hidden viewBox="0 0 14 14" className="h-3.5 w-3.5 shrink-0">
-          <path
-            d="M2.5 7.5 L5.75 10.5 L11.5 3.75"
-            fill="none"
-            stroke="var(--tl-muted)"
-            strokeWidth="1.75"
-            strokeLinecap="round"
-            strokeLinejoin="round"
+      {/* `mode="wait"` is right here and safe: the ring finishes collapsing
+          before the check starts drawing, and there is always a next child to
+          swap to — unlike the annotation rail, which can go to none. */}
+      <AnimatePresence mode="wait" initial={false}>
+        {pending ? (
+          <motion.span
+            key="ring"
+            aria-hidden
+            exit={reducedMotion ? { opacity: 0 } : { scale: 0 }}
+            transition={reducedMotion ? { duration: 0 } : easeRingCollapse}
+            className="h-3.5 w-3.5 shrink-0 rounded-full border-2 border-[var(--tl-accent)]"
           />
-        </svg>
-      )}
+        ) : (
+          <motion.svg
+            key="check"
+            aria-hidden
+            viewBox="0 0 14 14"
+            className="h-3.5 w-3.5 shrink-0"
+          >
+            {/* `pathLength` is Framer Motion's declarative stroke-dashoffset —
+                the check draws itself rather than fading in. */}
+            <motion.path
+              d="M2.5 7.5 L5.75 10.5 L11.5 3.75"
+              fill="none"
+              stroke="var(--tl-muted)"
+              strokeWidth="1.75"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              initial={{ pathLength: reducedMotion ? 1 : 0 }}
+              animate={{ pathLength: 1 }}
+              transition={reducedMotion ? { duration: 0 } : easeCheckDraw}
+            />
+          </motion.svg>
+        )}
+      </AnimatePresence>
     </>
   );
 }
@@ -333,17 +417,37 @@ function SyncBar({
        button is what the wireframe's `.primary` does anyway. */
     <div className="shrink-0 space-y-2.5 border-t border-[var(--tl-line-2)] bg-[var(--tl-dock)] px-4 py-3">
       <div className="flex items-center">
-        <span
+        {/* `layout` animates the width as the label changes; the colour is a
+            plain CSS transition, because nothing bouncy belongs on a colour
+            change (brief §6). Never an animated `width` — that would lay out
+            every frame. */}
+        <motion.span
+          layout
+          transition={easeColor}
           className={cn(
             'inline-flex items-center gap-1.5 whitespace-nowrap rounded-[var(--tl-radius-pill)] border px-2.5 py-1 text-[11px]',
+            'transition-colors duration-[240ms]',
             pill.tone === 'pending'
               ? 'border-[var(--tl-pending-border)] bg-[var(--tl-pending-bg)] text-[var(--tl-pending-fg)]'
               : 'border-[var(--tl-calm-border)] bg-[var(--tl-calm-bg)] text-[var(--tl-calm-fg)]',
           )}
           style={{ fontFamily: 'var(--tl-font-ui)' }}
         >
-          {pill.label}
-        </span>
+          {/* `popLayout` pulls the outgoing label out of flow immediately, so
+              the pill can resize to the incoming one while they crossfade. */}
+          <AnimatePresence mode="popLayout" initial={false}>
+            <motion.span
+              key={pill.id}
+              layout="position"
+              variants={pillLabelVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+            >
+              {pill.label}
+            </motion.span>
+          </AnimatePresence>
+        </motion.span>
       </div>
 
       <button
@@ -362,21 +466,36 @@ function SyncBar({
         )}
       >
         {pushing ? 'Syncing' : 'Sync'}
-        {queued > 0 && (
-          <span
-            className={cn(
-              'inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[11px] font-semibold',
-              // On the enabled amber button the badge is a knockout; on the
-              // disabled ghost button that would be white on white.
-              canSyncNow
-                ? 'bg-[var(--tl-on-accent)] text-[var(--tl-accent)]'
-                : 'bg-[var(--tl-line-2)] text-[var(--tl-ink)]',
-            )}
-            style={{ fontFamily: 'var(--tl-font-ui)' }}
-          >
-            {queued}
-          </span>
-        )}
+        <AnimatePresence initial={false}>
+          {queued > 0 && (
+            <motion.span
+              key="badge"
+              variants={badgeVariants}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              className={cn(
+                'inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[11px] font-semibold',
+                // A knockout on the filled maroon button; on the disabled ghost
+                // button that would be white on white, so it goes neutral.
+                canSyncNow
+                  ? 'bg-[var(--tl-on-accent)] text-[var(--tl-accent)]'
+                  : 'bg-[var(--tl-line-2)] text-[var(--tl-ink)]',
+              )}
+              style={{ fontFamily: 'var(--tl-font-ui)' }}
+            >
+              {/* Re-keyed on the count so every increment re-runs the pop. */}
+              <motion.span
+                key={queued}
+                initial={{ scale: 1.18 }}
+                animate={{ scale: 1 }}
+                transition={springBadge}
+              >
+                {queued}
+              </motion.span>
+            </motion.span>
+          )}
+        </AnimatePresence>
       </button>
     </div>
   );
@@ -395,9 +514,25 @@ function AirplaneSwitch({
   onToggle: () => void;
   hint: boolean;
 }) {
+  const { isRunning, reducedMotion } = useDemoStage();
+  const [pulsing, setPulsing] = useState(false);
+
+  /**
+   * Beat 0: after a few idle seconds the switch pulses ONCE, and only once.
+   * That is the entire attract behaviour — the brief is explicit that
+   * autoplaying the sequence would steal the discovery moment. Gated on
+   * `isRunning`, so the timer never runs off-screen, and skipped outright
+   * under reduced motion.
+   */
+  useEffect(() => {
+    if (!hint || !isRunning || reducedMotion) return;
+    const timer = window.setTimeout(() => setPulsing(true), IDLE_HINT_DELAY_MS);
+    return () => window.clearTimeout(timer);
+  }, [hint, isRunning, reducedMotion]);
+
   return (
     <div className="flex items-center gap-3">
-      <button
+      <motion.button
         type="button"
         role="switch"
         aria-checked={offline}
@@ -405,21 +540,24 @@ function AirplaneSwitch({
         // without this the switch announces as "switch, checked" with no name.
         aria-labelledby="tl-airplane-label"
         onClick={onToggle}
-        data-hint={hint || undefined}
+        variants={hintPulseVariants}
+        animate={pulsing ? 'pulse' : 'rest'}
+        onAnimationComplete={() => setPulsing(false)}
         className={cn(
-          'relative inline-flex h-6 w-11 shrink-0 items-center rounded-full border transition-colors',
+          'relative inline-flex h-6 w-11 shrink-0 items-center rounded-full border',
+          'transition-colors duration-200',
           offline ? 'border-primary bg-primary' : 'border-border bg-muted',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background',
         )}
       >
-        <span
+        {/* The thumb rides a spring on `x` — a transform, so it never lays out. */}
+        <motion.span
           aria-hidden
-          className={cn(
-            'ml-[3px] block h-[18px] w-[18px] rounded-full bg-background shadow-sm',
-            offline && 'translate-x-[20px]',
-          )}
+          className="ml-[3px] block h-[18px] w-[18px] rounded-full bg-background shadow-sm"
+          animate={{ x: offline ? 20 : 0 }}
+          transition={reducedMotion ? { duration: 0 } : springThumb}
         />
-      </button>
+      </motion.button>
       <span id="tl-airplane-label" className="text-sm text-foreground">
         Airplane mode
       </span>

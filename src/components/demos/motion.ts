@@ -123,6 +123,19 @@ export const badgeVariants: Variants = {
   exit: { opacity: 0, scale: 0.6, transition: easeExit },
 };
 
+/**
+ * Beat 0's one-time hint (brief §4): after a few idle seconds the switch pulses
+ * ONCE. This is the only attract behaviour in the demo — autoplaying the whole
+ * sequence would steal the discovery moment the demo exists for.
+ */
+export const hintPulseVariants: Variants = {
+  rest: { scale: 1 },
+  pulse: {
+    scale: [1, 1.12, 1],
+    transition: { duration: 0.36, ease: 'easeOut', times: [0, 0.45, 1] },
+  },
+};
+
 /** Annotation rail caption. Fade only — the brief is explicit: fade, do not slide. */
 export const annotationVariants: Variants = {
   initial: { opacity: 0 },

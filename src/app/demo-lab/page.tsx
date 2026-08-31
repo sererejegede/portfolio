@@ -11,6 +11,7 @@
  */
 
 import { useMemo, useState } from 'react';
+import { MotionConfig } from 'motion/react';
 import DemoFrame, { useDemoStageState } from '@/components/demos/DemoFrame';
 import type { DemoAnnotation, DemoDevice } from '@/components/demos/DemoFrame';
 import OfflineSyncDemo, {
@@ -44,13 +45,7 @@ const btnOn = 'rounded border border-primary bg-primary px-3 py-1 text-sm text-p
 export default function DemoLabPage() {
   return (
     <main className="container mx-auto max-w-screen-xl space-y-16 px-4 py-16">
-      <section>
-        <h1 className="mb-1 font-headline text-2xl">Step 5 — the demo screen</h1>
-        <p className="mb-8 text-sm text-muted-foreground">
-          Wired to the reducer. No motion yet.
-        </p>
-        <OfflineSyncDemo />
-      </section>
+      <DemoSection />
 
       <hr className="border-border" />
       <BeatMap />
@@ -59,6 +54,35 @@ export default function DemoLabPage() {
       <hr className="border-border" />
       <FrameSmokeTest />
     </main>
+  );
+}
+
+/* ------------------------------------------------------------------ *
+ * Step 6 - the demo, with a switch to force the reduced-motion path
+ * ------------------------------------------------------------------ */
+
+function DemoSection() {
+  const [forceReduced, setForceReduced] = useState(false);
+  return (
+    <section>
+      <h1 className="mb-1 font-headline text-2xl">Step 6 — the demo, with motion</h1>
+      <p className="mb-4 text-sm text-muted-foreground">
+        Wired to the reducer, animated per §6.
+      </p>
+      <label className="mb-8 inline-flex cursor-pointer items-center gap-2 text-sm">
+        <input
+          type="checkbox"
+          checked={forceReduced}
+          onChange={(e) => setForceReduced(e.target.checked)}
+        />
+        Force <code className="font-code">prefers-reduced-motion</code>
+      </label>
+      {/* `MotionConfig reducedMotion` is a real Framer Motion API, not a test
+          hook - it lets the §7 path be exercised without changing OS settings. */}
+      <MotionConfig reducedMotion={forceReduced ? 'always' : 'user'}>
+        <OfflineSyncDemo key={String(forceReduced)} />
+      </MotionConfig>
+    </section>
   );
 }
 

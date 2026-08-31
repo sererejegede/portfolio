@@ -1,61 +1,70 @@
 /* =============================================================================
  * Tailor's Ledger — design token snapshot
  *
- *   Colour source : github.com/sererejegede/tailors-ledger-app
- *                   docs/tailor-app-wireframe.html  (the `:root` block)
- *                   commit 09916c8e6c28b19da325b605f61893e1dbd6b26b
- *                   ("Set up Android dev-build path + handoff docs", 2026-06-21)
- *                   Copied 2026-08-28.
- *   Type source   : the SHIPPED app at tailors-ledger.vercel.app, read from
- *                   `document.fonts` on 2026-08-31. See the type section below.
- *
- *   MIND THE GAP: these two sources disagree. The shipped app's accent is a deep
- *   maroon (#810B38) where the wireframe is amber (#BD7A16), and its ink is
- *   #444748 where the wireframe is #1B1A17. The colours below are still the
- *   wireframe's. Reconcile before this is called finished.
+ *   Source : the SHIPPED app at tailors-ledger.vercel.app
+ *   Method : computed styles and `document.fonts` read off the running app
+ *            (Clients and Settings screens), 2026-08-31
  *
  * This is a ONE-TIME SNAPSHOT. It does not track the source and it will drift.
  * Nothing here is imported from the Tailor's Ledger repo at build time.
  *
- * Honest caveat, so future-me does not misremember: at the time of copying, the
- * Tailor's Ledger app ships no UI — `tailors-ledger-app/src` contains only the
- * WatermelonDB schema, models and seed data. The wireframe is therefore the
- * product's real design source of truth, but it is not a shipped app's token
- * file. The LIGHT ramp below is verbatim from it. The DARK ramp does not exist
- * upstream and was derived here for the portfolio (see note above `.dark`).
+ * PROVENANCE, because this changed once already: an earlier revision copied
+ * `docs/tailor-app-wireframe.html` from the tailors-ledger-app repo, since at
+ * that point the app shipped no UI at all. The app has since shipped, and it
+ * diverges from that wireframe — so the shipped app now wins.
+ *
+ * What changed between them, for anyone comparing against the old wireframe:
+ *   - accent   #BD7A16 amber  ->  #810B38 maroon
+ *   - ink      #1B1A17        ->  #444748
+ *   - screen   #FCFBF8        ->  #FAF9F6
+ *   - type     Space Grotesk  ->  Vollkorn + Plus Jakarta Sans
+ * The neutral ramp did NOT change: muted, faint, line and line-2 are byte
+ * identical in both, which is a good sign the wireframe was followed faithfully.
+ *
+ * The LIGHT ramp below is measured from the app. The DARK ramp does not exist
+ * upstream — the app is light-only — and was derived here (see note above `.dark`).
  *
  * Scoping: everything is namespaced under `.tl-demo` and prefixed `--tl-`, so it
  * cannot leak into the rest of the portfolio. Nothing is defined on `:root`.
  * ============================================================================= */
 
 .tl-demo {
-  /* ---- surfaces (verbatim) ---------------------------------------------- */
-  --tl-paper: #dcdad4; /* the desk the phone sits on */
-  --tl-screen: #fcfbf8; /* app background */
-  --tl-surface: #ffffff; /* rows, cards, keys — literal #fff upstream */
-  --tl-dock: #fbf8f1; /* docked number-pad tray */
-  --tl-bezel: #15140f; /* device chrome */
+  /* ---- surfaces (measured) ----------------------------------------------- */
+  --tl-paper: #ebe7df; /* the desk the phone sits on — app's outer html bg */
+  --tl-screen: #faf9f6; /* app background */
+  --tl-surface: #ffffff; /* rows, cards, inputs */
+  --tl-dock: #f4f2ec; /* DERIVED: tray between screen and paper */
+  --tl-bezel: #15140f; /* device chrome — ours, not the app's */
 
-  /* ---- ink (verbatim) --------------------------------------------------- */
-  --tl-ink: #1b1a17;
+  /* ---- ink (measured) ---------------------------------------------------- */
+  --tl-ink: #444748;
   --tl-muted: #8c887e;
   --tl-faint: #b6b1a6;
 
-  /* ---- rules (verbatim) ------------------------------------------------- */
+  /* ---- rules (measured) -------------------------------------------------- */
   --tl-line: #e2ded5;
   --tl-line-2: #d2cdc2;
 
-  /* ---- accent (verbatim) ------------------------------------------------ */
-  --tl-accent: #bd7a16;
-  --tl-accent-hover: #a96c10;
-  --tl-accent-tint: #f5ead3;
-  --tl-accent-ink: #794d08;
-  --tl-tint-border: #e6d2a8;
+  /* ---- accent (measured) --------------------------------------------------
+   * The maroon carries far better than the wireframe's amber did: white on it
+   * is 10.30:1, where white on #BD7A16 was only 3.52:1.
+   * `--tl-accent-ink` is the app's own darker maroon (the "Ledger" wordmark),
+   * reused for the pressed state rather than inventing a second shade.
+   * ------------------------------------------------------------------------ */
+  --tl-accent: #810b38;
+  --tl-accent-hover: #5e0827;
+  --tl-accent-tint: #f6e7ec;
+  --tl-accent-ink: #5e0827;
+  --tl-tint-border: #e9ced9; /* DERIVED: app draws no border on tinted chips */
   --tl-on-accent: #ffffff;
 
   /* ---- semantic state -----------------------------------------------------
    * Offline is a fully supported state, not an error (brief §4, Beat 1), so it
-   * gets the app's own amber tint — never red.
+   * gets the app's own brand tint — never a red borrowed from an error palette.
+   * Worth watching: since the brand went maroon, that tint is now a pale pink,
+   * which sits closer to error-red than the old amber did. In the app the maroon
+   * reads as brand (it is the FAB and the active tab), but check that the
+   * offline chip still reads as calm rather than alarmed.
    *
    * The tone tracks WHETHER THERE IS UNPUSHED WORK, not connectivity. Sync in
    * this app is a deliberate act, so a device that is online with three changes
@@ -65,6 +74,7 @@
    *
    * The palette upstream has no green and none was invented; pending vs synced
    * is carried by SHAPE (hollow ring vs drawn check), colour only reinforces it.
+   * That shape distinction matters more now, not less.
    * ------------------------------------------------------------------------ */
   --tl-calm-bg: var(--tl-surface);
   --tl-calm-fg: var(--tl-ink);
@@ -91,8 +101,8 @@
     Roboto, sans-serif;
 
   /* Type scale, lifted from the sizes the wireframe's client/set screens use. */
-  --tl-text-micro: 9.5px; /* uppercase mono section labels */
-  --tl-text-meta: 10.5px; /* mono metadata under a row */
+  --tl-text-micro: 9.5px; /* uppercase section labels */
+  --tl-text-meta: 10.5px; /* metadata under a row */
   --tl-text-sm: 12.5px;
   --tl-text-base: 14px; /* measurement row key */
   --tl-text-value: 15px; /* mono measurement value */
@@ -120,35 +130,37 @@
 }
 
 /* =============================================================================
- * Dark ramp — DERIVED, NOT COPIED.
+ * Dark ramp — DERIVED, NOT MEASURED.
  *
- * The wireframe is light-only; there is no upstream dark palette to snapshot.
- * These values keep the source's warm-paper character (every neutral stays on a
- * warm axis rather than going blue-grey) and lift the accent so it clears 4.5:1
- * on the dark screen. Measured against the dark screen (#1c1a16):
- *   ink 15.1:1 · muted 6.7:1 · accent 7.8:1 · accent-ink 9.5:1 · faint 3.4:1
+ * The shipped app is light-only; there is no upstream dark palette to snapshot.
+ * These values keep the source's warm-paper character (neutrals stay on a warm
+ * axis rather than going blue-grey) and lift the maroon to a rose so it clears
+ * 4.5:1 on the dark screen — #810B38 unchanged would be all but invisible there.
+ * Measured against the dark screen (#1b1a19):
+ *   ink 15.1:1 · muted 6.7:1 · accent 5.5:1 · accent-ink on tint 8.5:1 · faint 3.4:1
+ * Dark ink on the rose accent is also 5.5:1, so the accent works as a fill.
  * ============================================================================= */
 
 .dark .tl-demo {
-  --tl-paper: #14130f;
-  --tl-screen: #1c1a16;
-  --tl-surface: #26241e;
-  --tl-dock: #211f19;
+  --tl-paper: #131211;
+  --tl-screen: #1b1a19;
+  --tl-surface: #262421;
+  --tl-dock: #201f1d;
   --tl-bezel: #0a0907;
 
   --tl-ink: #f2efe7;
   --tl-muted: #a5a093;
   --tl-faint: #736e62;
 
-  --tl-line: #2e2b24;
-  --tl-line-2: #565044;
+  --tl-line: #2e2b27;
+  --tl-line-2: #56504a;
 
-  --tl-accent: #e0a244;
-  --tl-accent-hover: #f0b65e;
-  --tl-accent-tint: #3a2e14;
-  --tl-accent-ink: #e9b85f;
-  --tl-tint-border: #5c4a22;
-  --tl-on-accent: #1b1a17;
+  --tl-accent: #e0699a;
+  --tl-accent-hover: #ec85ae;
+  --tl-accent-tint: #3b121f;
+  --tl-accent-ink: #f0a6c0;
+  --tl-tint-border: #5c2536;
+  --tl-on-accent: #1b1a19;
 
   --tl-device-shadow: 0 24px 60px -28px rgba(0, 0, 0, 0.8);
 }

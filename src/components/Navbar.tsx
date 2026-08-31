@@ -4,17 +4,21 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import Logo from '@/assets/logo.png'
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { useState, useEffect } from 'react';
+import { cn } from '@/lib/utils';
 
 const navLinks = [
   { href: '#about', label: 'About' },
   { href: '#skills', label: 'Skills' },
   { href: '#projects', label: 'Projects' },
   { href: '#contact', label: 'Contact' },
+  { href: '/demo-lab', label: 'Demo' },
 ];
 
 export default function Navbar() {
+  const pathname = usePathname()
   const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
@@ -36,7 +40,7 @@ export default function Navbar() {
           <div className="hidden space-x-2 md:flex">
             {navLinks.map((link) => (
               <Button key={link.href} variant="ghost" asChild>
-                <Link href={link.href} className="font-medium text-foreground hover:text-primary">
+                <Link href={link.href} className={cn('font-medium text-foreground hover:text-primary', {'text-primary': pathname === link.href })}>
                   {link.label}
                 </Link>
               </Button>

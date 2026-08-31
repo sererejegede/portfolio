@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { ThemeProvider } from "next-themes";
+import Navbar from '@/components/Navbar';
 
 export const metadata: Metadata = {
   title: 'Serere Jegede',
@@ -27,7 +28,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <div className="flex flex-col min-h-screen">
+            <Navbar />
+            {children}
+          </div>
         </ThemeProvider>
       </body>
     </html>

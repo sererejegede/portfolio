@@ -11,8 +11,7 @@ export default function Home() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <div className="flex flex-col min-h-screen">
-      <Navbar />
+    <>
       <main className="flex-grow">
         <HeaderSection />
 
@@ -31,7 +30,7 @@ export default function Home() {
         </section>
 
         <Separator className="my-12 md:my-16 bg-border/50" />
-        
+
         <section id="projects" className="py-16 md:py-24 bg-card/30"> {/* Subtle background change for variety */}
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-screen-xl">
             <ProjectsSection />
@@ -58,6 +57,6 @@ export default function Home() {
         <p>&copy; {currentYear} Serere Jegede. All rights reserved.</p>
         <p className="text-sm mt-1">Built with Next.js & Tailwind CSS.</p>
       </footer>
-    </div>
+    </>
   );
 }

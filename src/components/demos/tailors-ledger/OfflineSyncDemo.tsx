@@ -229,7 +229,7 @@ function MeasurementRow({
       {active && (
         <span
           aria-hidden
-          className="absolute left-0 top-0 h-full w-[3px] bg-[var(--tl-accent)]"
+          className="absolute left-0 top-0 h-full w-[3px] bg-[var(--tl-accent-stroke)]"
         />
       )}
       <span className={cn('text-[14px]', active && 'font-semibold')}>{field}</span>
@@ -294,7 +294,7 @@ function StatusMark({ pending }: { pending: boolean }) {
       {pending ? (
         <span
           aria-hidden
-          className="h-3.5 w-3.5 shrink-0 rounded-full border-[1.5px] border-[var(--tl-accent)]"
+          className="h-3.5 w-3.5 shrink-0 rounded-full border-[1.5px] border-[var(--tl-accent-stroke)]"
         />
       ) : (
         <svg aria-hidden viewBox="0 0 14 14" className="h-3.5 w-3.5 shrink-0">
@@ -366,8 +366,8 @@ function SyncBar({
               // On the enabled amber button the badge is a knockout; on the
               // disabled ghost button that would be white on white.
               canSyncNow
-                ? 'bg-[var(--tl-on-accent)] text-[var(--tl-accent-ink)]'
-                : 'bg-[var(--tl-accent-tint)] text-[var(--tl-accent-ink)]',
+                ? 'bg-[var(--tl-on-accent)] text-[var(--tl-accent)]'
+                : 'bg-[var(--tl-line-2)] text-[var(--tl-ink)]',
             )}
             style={{ fontFamily: 'var(--tl-font-ui)' }}
           >

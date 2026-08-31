@@ -51,7 +51,8 @@
    * `--tl-accent-ink` is the app's own darker maroon (the "Ledger" wordmark),
    * reused for the pressed state rather than inventing a second shade.
    * ------------------------------------------------------------------------ */
-  --tl-accent: #810b38;
+  --tl-accent: #810b38; /* FILL: buttons, the active-tab bar */
+  --tl-accent-stroke: #810b38; /* thin marks: pending rings, small accent text */
   --tl-accent-hover: #5e0827;
   --tl-accent-tint: #f6e7ec;
   --tl-accent-ink: #5e0827;
@@ -60,11 +61,13 @@
 
   /* ---- semantic state -----------------------------------------------------
    * Offline is a fully supported state, not an error (brief §4, Beat 1), so it
-   * gets the app's own brand tint — never a red borrowed from an error palette.
-   * Worth watching: since the brand went maroon, that tint is now a pale pink,
-   * which sits closer to error-red than the old amber did. In the app the maroon
-   * reads as brand (it is the FAB and the active tab), but check that the
-   * offline chip still reads as calm rather than alarmed.
+   * never gets a red borrowed from an error palette.
+   *
+   * In LIGHT it wears the app's own brand tint: a pale pink at 8% saturation
+   * reads as quiet, and the maroon is plainly brand here (it is the FAB and the
+   * active tab). In DARK the same idea inverts — a filled maroon chip on a dark
+   * screen reads as an alert — so dark drops the brand from the chip entirely.
+   * See the override at the bottom of this file.
    *
    * The tone tracks WHETHER THERE IS UNPUSHED WORK, not connectivity. Sync in
    * this app is a deliberate act, so a device that is online with three changes
@@ -84,7 +87,7 @@
   --tl-pending-fg: var(--tl-accent-ink);
   --tl-pending-border: var(--tl-tint-border);
 
-  --tl-focus-ring: var(--tl-accent);
+  --tl-focus-ring: var(--tl-accent-stroke);
 
   /* ---- type ---------------------------------------------------------------
    * FROM THE SHIPPED APP, not the wireframe. tailors-ledger.vercel.app loads
@@ -155,12 +158,48 @@
   --tl-line: #2e2b27;
   --tl-line-2: #56504a;
 
-  --tl-accent: #e0699a;
-  --tl-accent-hover: #ec85ae;
+  /* ---- accent: the FILL stays the real maroon --------------------------------
+   * An earlier pass lifted the whole accent to a rose so it would clear 4.5:1 on
+   * the dark screen. That was the wrong fix: it made the Sync button read pink
+   * rather than brand. The contrast a filled button needs is between its LABEL
+   * and its fill, and white on #810B38 is 10.30:1 — so the true maroon is fine
+   * as a fill on dark, and the button stays unmistakably the app's colour.
+   *
+   * A 1.5px ring is a different problem. #810B38 as a hairline on the dark
+   * screen is 1.7:1 and effectively invisible, so thin marks get their own
+   * lifted token at 5.5:1. Fill and stroke are simply not the same job.
+   * ------------------------------------------------------------------------ */
+  --tl-accent: #810b38;
+  --tl-accent-stroke: #e0699a;
+  --tl-accent-hover: #9d1445;
   --tl-accent-tint: #3b121f;
   --tl-accent-ink: #f0a6c0;
   --tl-tint-border: #5c2536;
-  --tl-on-accent: #1b1a19;
+  --tl-on-accent: #ffffff;
+
+  /* ---- state chip: neutral in dark ----------------------------------------
+   * On the light screen a pale pink chip still reads as calm, but on a dark one
+   * a filled maroon chip reads as an alert — and offline is not an error
+   * (brief §4, Beat 1). So in dark the chip drops the brand entirely and the
+   * maroon stays where it belongs: on the Sync button, which IS a call to act.
+   *
+   * That leaves pending and calm both neutral, so they are separated by FILL
+   * rather than hue — pending is a filled chip in full-strength ink, calm is an
+   * unfilled outline in muted. Same trick as the ring-vs-check marks: structure
+   * carries the meaning, colour only ever reinforces it.
+   *
+   * Numbers: pending ink 9.8:1 on its fill, calm muted 6.3:1 on the dock. The
+   * chip's own outline does the separating — the pending border reads 2.1:1
+   * against the dock where the calm border reads 1.2:1, so the filled chip is
+   * the one with a visible edge.
+   * ------------------------------------------------------------------------ */
+  --tl-pending-bg: #3d3934;
+  --tl-pending-fg: var(--tl-ink);
+  --tl-pending-border: var(--tl-line-2);
+
+  --tl-calm-bg: transparent;
+  --tl-calm-fg: var(--tl-muted);
+  --tl-calm-border: var(--tl-line);
 
   --tl-device-shadow: 0 24px 60px -28px rgba(0, 0, 0, 0.8);
 }

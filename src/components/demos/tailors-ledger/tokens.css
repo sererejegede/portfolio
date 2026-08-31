@@ -1,11 +1,18 @@
 /* =============================================================================
  * Tailor's Ledger — design token snapshot
  *
- *   Source repo   : github.com/sererejegede/tailors-ledger-app
- *   Source file   : docs/tailor-app-wireframe.html  (the `:root` block)
- *   Source commit : 09916c8e6c28b19da325b605f61893e1dbd6b26b  ("Set up Android
- *                   dev-build path + handoff docs", 2026-06-21)
- *   Copied on     : 2026-08-28
+ *   Colour source : github.com/sererejegede/tailors-ledger-app
+ *                   docs/tailor-app-wireframe.html  (the `:root` block)
+ *                   commit 09916c8e6c28b19da325b605f61893e1dbd6b26b
+ *                   ("Set up Android dev-build path + handoff docs", 2026-06-21)
+ *                   Copied 2026-08-28.
+ *   Type source   : the SHIPPED app at tailors-ledger.vercel.app, read from
+ *                   `document.fonts` on 2026-08-31. See the type section below.
+ *
+ *   MIND THE GAP: these two sources disagree. The shipped app's accent is a deep
+ *   maroon (#810B38) where the wireframe is amber (#BD7A16), and its ink is
+ *   #444748 where the wireframe is #1B1A17. The colours below are still the
+ *   wireframe's. Reconcile before this is called finished.
  *
  * This is a ONE-TIME SNAPSHOT. It does not track the source and it will drift.
  * Nothing here is imported from the Tailor's Ledger repo at build time.
@@ -69,10 +76,19 @@
 
   --tl-focus-ring: var(--tl-accent);
 
-  /* ---- type (verbatim) --------------------------------------------------- */
-  --tl-font-display: 'Space Grotesk', system-ui, sans-serif;
-  --tl-font-ui: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
-  --tl-font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  /* ---- type ---------------------------------------------------------------
+   * FROM THE SHIPPED APP, not the wireframe. tailors-ledger.vercel.app loads
+   * exactly two families (checked via `document.fonts` on 2026-08-31):
+   * Vollkorn 600/700 for display, Plus Jakarta Sans 400/500/600/700 for UI.
+   * The wireframe's Space Grotesk did not survive into the build.
+   *
+   * There is deliberately NO mono token: the app ships no monospace face, so
+   * measurement values use the UI font with tabular figures instead. The
+   * wireframe's mono metadata style is not what shipped.
+   * ------------------------------------------------------------------------ */
+  --tl-font-display: var(--font-vollkorn), Georgia, 'Times New Roman', serif;
+  --tl-font-ui: var(--font-plus-jakarta-sans), system-ui, -apple-system, 'Segoe UI',
+    Roboto, sans-serif;
 
   /* Type scale, lifted from the sizes the wireframe's client/set screens use. */
   --tl-text-micro: 9.5px; /* uppercase mono section labels */

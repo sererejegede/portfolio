@@ -112,6 +112,34 @@ export function currentValue(state: SyncState, field: MeasurementField): number 
   return best ? best.value : null;
 }
 
+/**
+ * Records written during this run, newest first.
+ *
+ * The seeded rows stay in `records` — they are the set's stored values and
+ * `currentValue` reads them — but they are NOT listed. The real app does not
+ * show a flat history feed; history is per-item and collapsed behind the row.
+ * So the demo's list is the honest thing it actually is: the changes this
+ * session produced, and their push status. On load it is empty.
+ */
+export function sessionRecords(state: SyncState): SyncRecord[] {
+  return state.records.filter((record) => record.recordedAt >= FIRST_RECORD_SEQ);
+}
+
+/**
+ * The value this record superseded, or null if the field had none. Append-only
+ * means the old row is still there to be read - which is the point, so the list
+ * shows "26 1/2 -> 26 3/4" rather than just the new number.
+ */
+export function previousValue(state: SyncState, record: SyncRecord): number | null {
+  let best: SyncRecord | null = null;
+  for (const candidate of state.records) {
+    if (candidate.field !== record.field) continue;
+    if (candidate.recordedAt >= record.recordedAt) continue;
+    if (!best || candidate.recordedAt > best.recordedAt) best = candidate;
+  }
+  return best ? best.value : null;
+}
+
 /** The playback has more edits to make. */
 export function isScriptRunning(state: SyncState): boolean {
   return state.scriptStarted && state.scriptStep < SCRIPT.length;

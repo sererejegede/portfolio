@@ -25,7 +25,12 @@ import type { DemoAnnotation } from '../DemoFrame';
 import { cn } from '@/lib/utils';
 import { CLIENT, INCH_MARK, formatInches } from './data';
 import type { SyncRecord } from './data';
-import { canSync, useSyncSimulation } from './useSyncSimulation';
+import {
+  canSync,
+  previousValue,
+  sessionRecords,
+  useSyncSimulation,
+} from './useSyncSimulation';
 import type { SyncState } from './useSyncSimulation';
 import './tokens.css';
 
@@ -92,6 +97,7 @@ export default function OfflineSyncDemo() {
   });
 
   const pill = useMemo(() => pillState(state), [state]);
+  const changes = useMemo(() => sessionRecords(state), [state]);
   const offline = state.connection === 'offline';
 
   return (
@@ -143,20 +149,32 @@ export default function OfflineSyncDemo() {
         </ul>
 
         <p
-          className="shrink-0 px-4 pb-1.5 pt-4 text-[10px] uppercase tracking-[0.14em] text-[var(--tl-muted)]"
-          style={{ fontFamily: 'var(--tl-font-mono)' }}
-          id="tl-history-label"
+          className="shrink-0 px-4 pb-1.5 pt-4 text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--tl-muted)]"
+          id="tl-changes-label"
         >
-          History
+          This session
         </p>
 
+        {/* Only what this run produced. The seeded values are the set's stored
+            state and appear on the rows above; the app has no flat history feed
+            (history is per-item and collapsed), so listing one would be a lie. */}
         <ul
-          aria-labelledby="tl-history-label"
+          aria-labelledby="tl-changes-label"
           className="min-h-0 flex-1 overflow-y-auto border-t border-[var(--tl-line)]"
         >
-          {state.records.map((record) => (
-            <HistoryRow key={record.id} record={record} />
-          ))}
+          {changes.length === 0 ? (
+            <li className="px-4 py-6 text-center text-[13px] text-[var(--tl-muted)]">
+              No changes yet.
+            </li>
+          ) : (
+            changes.map((record) => (
+              <ChangeRow
+                key={record.id}
+                record={record}
+                previous={previousValue(state, record)}
+              />
+            ))
+          )}
         </ul>
 
         <SyncBar
@@ -181,7 +199,7 @@ function StatusBar({ offline }: { offline: boolean }) {
     <div
       aria-hidden
       className="flex h-[30px] shrink-0 items-center justify-between px-[22px] text-[11px]"
-      style={{ fontFamily: 'var(--tl-font-mono)' }}
+      style={{ fontFamily: 'var(--tl-font-ui)' }}
     >
       <span>9:41</span>
       <span className="tracking-[2px] text-[var(--tl-muted)]">
@@ -220,7 +238,7 @@ function MeasurementRow({
           'text-[15px] tabular-nums',
           active ? 'font-semibold text-[var(--tl-accent-ink)]' : 'text-[var(--tl-ink)]',
         )}
-        style={{ fontFamily: 'var(--tl-font-mono)' }}
+        style={{ fontFamily: 'var(--tl-font-ui)' }}
       >
         {formatInches(value)}
         {INCH_MARK}
@@ -229,7 +247,13 @@ function MeasurementRow({
   );
 }
 
-function HistoryRow({ record }: { record: SyncRecord }) {
+function ChangeRow({
+  record,
+  previous,
+}: {
+  record: SyncRecord;
+  previous: number | null;
+}) {
   const pending = record.status === 'pending';
   return (
     <li
@@ -240,18 +264,20 @@ function HistoryRow({ record }: { record: SyncRecord }) {
     >
       <StatusMark pending={pending} />
       <span className="min-w-0 flex-1 truncate text-[13px]">{record.field}</span>
-      <span
-        className="text-[13px] tabular-nums"
-        style={{ fontFamily: 'var(--tl-font-mono)' }}
-      >
-        {formatInches(record.value)}
-        {INCH_MARK}
-      </span>
-      <span
-        className="w-[52px] shrink-0 text-right text-[10.5px] text-[var(--tl-muted)]"
-        style={{ fontFamily: 'var(--tl-font-mono)' }}
-      >
-        {record.label}
+      <span className="shrink-0 text-[13px] tabular-nums">
+        {/* The superseded value, shown struck rather than discarded — the old
+            row still exists, which is the whole point of an append-only table. */}
+        {previous != null && (
+          <span className="text-[var(--tl-muted)] line-through">
+            {formatInches(previous)}
+            {INCH_MARK}
+          </span>
+        )}
+        {previous != null && <span aria-hidden className="px-1 text-[var(--tl-faint)]">→</span>}
+        <span className="font-semibold">
+          {formatInches(record.value)}
+          {INCH_MARK}
+        </span>
       </span>
     </li>
   );
@@ -314,7 +340,7 @@ function SyncBar({
               ? 'border-[var(--tl-pending-border)] bg-[var(--tl-pending-bg)] text-[var(--tl-pending-fg)]'
               : 'border-[var(--tl-calm-border)] bg-[var(--tl-calm-bg)] text-[var(--tl-calm-fg)]',
           )}
-          style={{ fontFamily: 'var(--tl-font-mono)' }}
+          style={{ fontFamily: 'var(--tl-font-ui)' }}
         >
           {pill.label}
         </span>
@@ -343,7 +369,7 @@ function SyncBar({
                 ? 'bg-[var(--tl-on-accent)] text-[var(--tl-accent-ink)]'
                 : 'bg-[var(--tl-accent-tint)] text-[var(--tl-accent-ink)]',
             )}
-            style={{ fontFamily: 'var(--tl-font-mono)' }}
+            style={{ fontFamily: 'var(--tl-font-ui)' }}
           >
             {queued}
           </span>

@@ -1,7 +1,28 @@
 import type { Metadata } from 'next';
+import { Plus_Jakarta_Sans, Vollkorn } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from "next-themes";
 import Navbar from '@/components/Navbar';
+
+/**
+ * The two faces the shipped Tailor's Ledger app uses, for the project demo.
+ * Self-hosted through next/font rather than a Google Fonts <link>, so they cost
+ * no extra connection and no render-blocking stylesheet — the demo must not
+ * regress LCP (demo brief §8). Only the weights the app actually loads.
+ */
+const vollkorn = Vollkorn({
+  subsets: ['latin'],
+  weight: ['600', '700'],
+  variable: '--font-vollkorn',
+  display: 'swap',
+});
+
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-plus-jakarta-sans',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: 'Serere Jegede',
@@ -14,7 +35,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html suppressHydrationWarning lang="en">
+    <html
+      suppressHydrationWarning
+      lang="en"
+      className={`${vollkorn.variable} ${plusJakartaSans.variable}`}
+    >
       <head>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />

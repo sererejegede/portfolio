@@ -300,11 +300,16 @@ function SyncBar({
   onSync: () => void;
 }) {
   return (
-    <div className="shrink-0 border-t border-[var(--tl-line-2)] bg-[var(--tl-dock)] px-4 py-3">
-      <div className="flex items-center justify-between gap-3">
+    /* Stacked, not side by side. The phone is ~297px wide at a 390px viewport,
+       where "Offline · saving locally" wraps to two lines beside the button and
+       changes the bar's height — which shoves the history list. Stacking makes
+       the bar height-stable whatever the pill says, and a full-width primary
+       button is what the wireframe's `.primary` does anyway. */
+    <div className="shrink-0 space-y-2.5 border-t border-[var(--tl-line-2)] bg-[var(--tl-dock)] px-4 py-3">
+      <div className="flex items-center">
         <span
           className={cn(
-            'inline-flex items-center gap-1.5 rounded-[var(--tl-radius-pill)] border px-2.5 py-1 text-[11px]',
+            'inline-flex items-center gap-1.5 whitespace-nowrap rounded-[var(--tl-radius-pill)] border px-2.5 py-1 text-[11px]',
             pill.tone === 'pending'
               ? 'border-[var(--tl-pending-border)] bg-[var(--tl-pending-bg)] text-[var(--tl-pending-fg)]'
               : 'border-[var(--tl-calm-border)] bg-[var(--tl-calm-bg)] text-[var(--tl-calm-fg)]',
@@ -313,30 +318,37 @@ function SyncBar({
         >
           {pill.label}
         </span>
-
-        <button
-          type="button"
-          onClick={onSync}
-          disabled={!canSyncNow}
-          className={cn(
-            'relative inline-flex shrink-0 items-center gap-2 rounded-[var(--tl-radius-md)] px-4 py-2',
-            'text-[13.5px] font-semibold',
-            'bg-[var(--tl-accent)] text-[var(--tl-on-accent)]',
-            'disabled:bg-[var(--tl-line-2)] disabled:text-[var(--tl-muted)]',
-            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tl-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--tl-dock)]',
-          )}
-        >
-          {pushing ? 'Syncing' : 'Sync'}
-          {queued > 0 && (
-            <span
-              className="inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[var(--tl-on-accent)] px-1 text-[11px] font-semibold text-[var(--tl-accent-ink)]"
-              style={{ fontFamily: 'var(--tl-font-mono)' }}
-            >
-              {queued}
-            </span>
-          )}
-        </button>
       </div>
+
+      <button
+        type="button"
+        onClick={onSync}
+        disabled={!canSyncNow}
+        className={cn(
+          'relative inline-flex w-full items-center justify-center gap-2 rounded-[var(--tl-radius-lg)] px-4 py-2.5',
+          'text-[13.5px] font-semibold',
+          'bg-[var(--tl-accent)] text-[var(--tl-on-accent)]',
+          'disabled:border disabled:border-[var(--tl-line-2)] disabled:bg-[var(--tl-surface)] disabled:text-[var(--tl-muted)]',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tl-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--tl-dock)]',
+        )}
+      >
+        {pushing ? 'Syncing' : 'Sync'}
+        {queued > 0 && (
+          <span
+            className={cn(
+              'inline-flex h-[18px] min-w-[18px] items-center justify-center rounded-full px-1 text-[11px] font-semibold',
+              // On the enabled amber button the badge is a knockout; on the
+              // disabled ghost button that would be white on white.
+              canSyncNow
+                ? 'bg-[var(--tl-on-accent)] text-[var(--tl-accent-ink)]'
+                : 'bg-[var(--tl-accent-tint)] text-[var(--tl-accent-ink)]',
+            )}
+            style={{ fontFamily: 'var(--tl-font-mono)' }}
+          >
+            {queued}
+          </span>
+        )}
+      </button>
     </div>
   );
 }
@@ -360,6 +372,9 @@ function AirplaneSwitch({
         type="button"
         role="switch"
         aria-checked={offline}
+        // The visible text is a sibling, so it has to be associated explicitly -
+        // without this the switch announces as "switch, checked" with no name.
+        aria-labelledby="tl-airplane-label"
         onClick={onToggle}
         data-hint={hint || undefined}
         className={cn(
@@ -376,7 +391,9 @@ function AirplaneSwitch({
           )}
         />
       </button>
-      <span className="text-sm text-foreground">Airplane mode</span>
+      <span id="tl-airplane-label" className="text-sm text-foreground">
+        Airplane mode
+      </span>
     </div>
   );
 }

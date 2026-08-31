@@ -294,7 +294,7 @@ function StatusMark({ pending }: { pending: boolean }) {
       {pending ? (
         <span
           aria-hidden
-          className="h-3.5 w-3.5 shrink-0 rounded-full border-[1.5px] border-[var(--tl-accent-stroke)]"
+          className="h-3.5 w-3.5 shrink-0 rounded-full border-2 border-[var(--tl-accent)]"
         />
       ) : (
         <svg aria-hidden viewBox="0 0 14 14" className="h-3.5 w-3.5 shrink-0">
@@ -353,8 +353,11 @@ function SyncBar({
         className={cn(
           'relative inline-flex w-full items-center justify-center gap-2 rounded-[var(--tl-radius-lg)] px-4 py-2.5',
           'text-[13.5px] font-semibold',
-          'bg-[var(--tl-accent)] text-[var(--tl-on-accent)]',
-          'disabled:border disabled:border-[var(--tl-line-2)] disabled:bg-[var(--tl-surface)] disabled:text-[var(--tl-muted)]',
+          // The border is always present, only its colour changes. Applying it
+          // on :disabled alone made the button 2px taller when disabled, so the
+          // whole bar jumped every time airplane mode flipped `canSync`.
+          'border border-transparent bg-[var(--tl-accent)] text-[var(--tl-on-accent)]',
+          'disabled:border-[var(--tl-line-2)] disabled:bg-[var(--tl-surface)] disabled:text-[var(--tl-muted)]',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--tl-focus-ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--tl-dock)]',
         )}
       >

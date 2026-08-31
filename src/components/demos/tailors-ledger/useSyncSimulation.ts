@@ -113,7 +113,14 @@ export function currentValue(state: SyncState, field: MeasurementField): number 
 }
 
 /**
- * Records written during this run, newest first.
+ * Records written during this run, OLDEST FIRST.
+ *
+ * `state.records` is newest-first because that is the order the append-only
+ * table is read in, but this list is displayed directly beneath the measurement
+ * rows. The playback follows the template's order (Chest, Sleeve length,
+ * Waist), so listing oldest-first makes the two lists read down the screen in
+ * the same order — and it also means the FIFO drain ticks visibly top to bottom
+ * rather than bottom to top.
  *
  * The seeded rows stay in `records` — they are the set's stored values and
  * `currentValue` reads them — but they are NOT listed. The real app does not
@@ -122,7 +129,9 @@ export function currentValue(state: SyncState, field: MeasurementField): number 
  * session produced, and their push status. On load it is empty.
  */
 export function sessionRecords(state: SyncState): SyncRecord[] {
-  return state.records.filter((record) => record.recordedAt >= FIRST_RECORD_SEQ);
+  return state.records
+    .filter((record) => record.recordedAt >= FIRST_RECORD_SEQ)
+    .sort((a, b) => a.recordedAt - b.recordedAt);
 }
 
 /**

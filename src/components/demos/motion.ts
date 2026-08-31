@@ -76,15 +76,19 @@ export const IDLE_HINT_DELAY_MS = 3000;
 
 /* --- Scripted measurement playback ---------------------------------- *
  * The visitor does not enter measurements; the demo plays them back. These
- * three numbers set that pace. Commit-to-commit is GAP + FOCUS = 700ms, which
+ * three numbers set that pace. Commit-to-commit is GAP + FOCUS = 780ms, which
  * reads as deliberate entry rather than three values blurring into one event.
  */
 
 /** Flipping to offline, to the first row lighting up. Lets the pill land first. */
 export const SCRIPT_LEAD_IN_MS = 400;
 
-/** How long a row stays lit before its new value commits. */
-export const SCRIPT_FOCUS_MS = 250;
+/**
+ * How long a row stays lit before its new value commits. Deliberately longer
+ * than the 250ms first tried: at that speed the highlight registered as a
+ * flicker rather than as someone pausing on a field.
+ */
+export const SCRIPT_FOCUS_MS = 330;
 
 /** From one value committing to the next row lighting up. */
 export const SCRIPT_GAP_MS = 450;
@@ -108,10 +112,15 @@ export const pillLabelVariants: Variants = {
   exit: { opacity: 0, transition: easeExit },
 };
 
-/** A measurement row arriving in the history list. */
+/**
+ * A change row arriving in the list. It slides in from the leading edge rather
+ * than dropping from above: the list grows downward, so a row falling INTO the
+ * position it was going to occupy anyway read as a stutter. Coming from the
+ * side keeps the entrance clear of the layout shift the insert itself causes.
+ */
 export const rowVariants: Variants = {
-  initial: { opacity: 0, y: -8 },
-  animate: { opacity: 1, y: 0, transition: easeEnter },
+  initial: { opacity: 0, x: -14 },
+  animate: { opacity: 1, x: 0, transition: easeEnter },
   exit: { opacity: 0, transition: easeExit },
 };
 

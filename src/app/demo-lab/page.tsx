@@ -12,14 +12,16 @@
 
 import { useMemo, useState } from 'react';
 import { MotionConfig } from 'motion/react';
+import { DemoFrameSkeleton } from '@/components/demos/frame-shell';
+import { RAIL_TITLE } from '@/components/demos/tailors-ledger/demo-meta';
 import DemoFrame, { useDemoStageState } from '@/components/demos/DemoFrame';
 import type { DemoAnnotation, DemoDevice } from '@/components/demos/DemoFrame';
 import OfflineSyncDemo, {
-  ANNOTATIONS as DEMO_ANNOTATIONS,
   activeAnnotationId,
   announcementFor,
   pillState,
 } from '@/components/demos/tailors-ledger/OfflineSyncDemo';
+import { ANNOTATIONS as DEMO_ANNOTATIONS } from '@/components/demos/tailors-ledger/demo-meta';
 import { SCRIPT, formatInches, INCH_MARK } from '@/components/demos/tailors-ledger/data';
 import {
   canSync,
@@ -48,6 +50,8 @@ export default function DemoLabPage() {
     <main className="container mx-auto max-w-screen-xl space-y-16 px-4 py-16">
       <DemoSection />
 
+      <hr className="border-border" />
+      <SkeletonParity />
       <hr className="border-border" />
       <BeatMap />
       <hr className="border-border" />
@@ -80,9 +84,39 @@ function DemoSection() {
       </label>
       {/* `MotionConfig reducedMotion` is a real Framer Motion API, not a test
           hook - it lets the §7 path be exercised without changing OS settings. */}
-      <MotionConfig reducedMotion={forceReduced ? 'always' : 'user'}>
-        <OfflineSyncDemo key={String(forceReduced)} />
-      </MotionConfig>
+      <div data-measure="real">
+        <MotionConfig reducedMotion={forceReduced ? 'always' : 'user'}>
+          <OfflineSyncDemo key={String(forceReduced)} />
+        </MotionConfig>
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ *
+ * Skeleton parity - the §8 "reserve the space" check
+ *
+ * `next/dynamic` swaps the skeleton for the real demo once its chunk lands. If
+ * the two are not the same height, that swap is a layout shift. Rendering them
+ * one above the other makes any drift measurable instead of assumed.
+ * ------------------------------------------------------------------ */
+
+function SkeletonParity() {
+  return (
+    <section>
+      <h2 className="mb-1 font-headline text-2xl">Skeleton parity</h2>
+      <p className="mb-6 text-sm text-muted-foreground">
+        The loading placeholder, rendered on its own. It must match the demo above it
+        exactly — compare <code className="font-code">data-measure</code> heights.
+      </p>
+      <div data-measure="skeleton">
+        <DemoFrameSkeleton
+          device="phone"
+          annotations={DEMO_ANNOTATIONS}
+          railTitle={RAIL_TITLE}
+          screenClassName="tl-demo bg-[var(--tl-screen)]"
+        />
+      </div>
     </section>
   );
 }

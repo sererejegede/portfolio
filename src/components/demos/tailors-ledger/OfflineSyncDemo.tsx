@@ -23,7 +23,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import type { Variants } from 'motion/react';
 import DemoFrame, { useDemoStage, useDemoStageState } from '../DemoFrame';
-import type { DemoAnnotation } from '../DemoFrame';
+import { ANNOTATIONS, RAIL_TITLE } from './demo-meta';
 import { cn } from '@/lib/utils';
 import {
   IDLE_HINT_DELAY_MS,
@@ -82,14 +82,6 @@ export function pillState(state: SyncState): PillState {
   }
   return { id: 'online', label: 'Online', tone: 'calm' };
 }
-
-export const ANNOTATIONS: readonly DemoAnnotation[] = [
-  { id: 'offline', text: 'Connection lost — the app does not care' },
-  { id: 'written', text: 'Written to on-device SQLite' },
-  { id: 'queued', text: '3 changes queued · nothing is lost' },
-  { id: 'pushing', text: 'Pushing to Postgres · last-write-wins' },
-  { id: 'in-sync', text: 'In sync' },
-];
 
 /** Which caption the rail shows. Most specific beat first. */
 export function activeAnnotationId(state: SyncState): string | null {
@@ -191,7 +183,7 @@ export default function OfflineSyncDemo() {
       label="Tailor's Ledger — offline capture and manual sync"
       annotations={ANNOTATIONS}
       activeAnnotationId={activeAnnotationId(state)}
-      railTitle="What just happened"
+      railTitle={RAIL_TITLE}
       onReplay={reset}
       aside={
         <>

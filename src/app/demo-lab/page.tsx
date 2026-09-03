@@ -17,6 +17,7 @@ import type { DemoAnnotation, DemoDevice } from '@/components/demos/DemoFrame';
 import OfflineSyncDemo, {
   ANNOTATIONS as DEMO_ANNOTATIONS,
   activeAnnotationId,
+  announcementFor,
   pillState,
 } from '@/components/demos/tailors-ledger/OfflineSyncDemo';
 import { SCRIPT, formatInches, INCH_MARK } from '@/components/demos/tailors-ledger/data';
@@ -126,6 +127,7 @@ function BeatMap() {
         canSync: canSync(state),
         pill: pillState(state),
         caption: DEMO_ANNOTATIONS.find((a) => a.id === annotationId)?.text ?? '—',
+        announced: announcementFor(state) || '(silent)',
       };
     });
   }, []);
@@ -147,7 +149,8 @@ function BeatMap() {
               <th className="py-1 pr-4 font-normal">active row</th>
               <th className="py-1 pr-4 font-normal">canSync</th>
               <th className="py-1 pr-4 font-normal">pill</th>
-              <th className="py-1 font-normal">caption</th>
+              <th className="py-1 pr-4 font-normal">caption</th>
+              <th className="py-1 font-normal">announced</th>
             </tr>
           </thead>
           <tbody>
@@ -163,7 +166,8 @@ function BeatMap() {
                   {r.pill.label}{' '}
                   <span className="text-muted-foreground">[{r.pill.tone}]</span>
                 </td>
-                <td className="py-1">{r.caption}</td>
+                <td className="py-1 pr-4">{r.caption}</td>
+                <td className="py-1">{r.announced}</td>
               </tr>
             ))}
           </tbody>

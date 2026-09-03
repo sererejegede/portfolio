@@ -101,6 +101,53 @@ export function activeAnnotationId(state: SyncState): string | null {
   return null;
 }
 
+/* ------------------------------------------------------------------ *
+ * Screen-reader announcements
+ * ------------------------------------------------------------------ */
+
+/**
+ * What a screen reader should hear for the CURRENT settled state.
+ *
+ * Deliberately one sentence per state, not per event. The queue changes six
+ * times in a single run — three inserts ~780ms apart and three pushes 250ms
+ * apart — and narrating each one would be unusable.
+ */
+export function announcementFor(state: SyncState): string {
+  if (state.sync === 'pushing') return 'Syncing.';
+  if (state.hasSynced && state.queue.length === 0) return 'All changes synced.';
+  if (state.queue.length > 0) {
+    const n = state.queue.length;
+    return `${n} ${n === 1 ? 'change' : 'changes'} waiting to sync.`;
+  }
+  if (state.connection === 'offline') {
+    return 'Airplane mode on. Measurements are saving on this device.';
+  }
+  return '';
+}
+
+/** How long the state must hold still before it is worth announcing. */
+const ANNOUNCE_SETTLE_MS = 700;
+
+/**
+ * Announce the state the demo SETTLES on, not every state it passes through
+ * (brief §7: "do not announce every frame").
+ *
+ * Debounced rather than throttled on purpose: a throttle would emit the first
+ * value of a burst — "1 change waiting to sync" — and then a stale tail. What a
+ * listener wants is where the burst ended up, so each change restarts the timer
+ * and only the value that survives `ANNOUNCE_SETTLE_MS` is ever published.
+ * A drain of three takes ~750ms and so announces "All changes synced." once,
+ * rather than counting 3, 2, 1 down out loud.
+ */
+function useSettledAnnouncement(message: string): string {
+  const [announced, setAnnounced] = useState('');
+  useEffect(() => {
+    const timer = window.setTimeout(() => setAnnounced(message), ANNOUNCE_SETTLE_MS);
+    return () => window.clearTimeout(timer);
+  }, [message]);
+  return announced;
+}
+
 /** The "No changes yet." placeholder. Fade only — it has nowhere to slide from. */
 const emptyVariants: Variants = {
   initial: { opacity: 0 },
@@ -134,6 +181,7 @@ export default function OfflineSyncDemo() {
   const pill = useMemo(() => pillState(state), [state]);
   const changes = useMemo(() => sessionRecords(state), [state]);
   const offline = state.connection === 'offline';
+  const announcement = useSettledAnnouncement(announcementFor(state));
 
   return (
     <DemoFrame
@@ -146,11 +194,19 @@ export default function OfflineSyncDemo() {
       railTitle="What just happened"
       onReplay={reset}
       aside={
-        <AirplaneSwitch
-          offline={offline}
-          onToggle={toggleConnection}
-          hint={!state.hasInteracted}
-        />
+        <>
+          <AirplaneSwitch
+            offline={offline}
+            onToggle={toggleConnection}
+            hint={!state.hasInteracted}
+          />
+          {/* Present from first render, empty. A live region added to the DOM at
+              the same moment as its text is unreliable — the region has to exist
+              before the content it announces. */}
+          <p aria-live="polite" aria-atomic="true" className="sr-only">
+            {announcement}
+          </p>
+        </>
       }
     >
       <div
@@ -338,6 +394,8 @@ function ChangeRow({
             {INCH_MARK}
           </span>
         )}
+        {/* The arrow is a glyph; the relationship it carries needs saying. */}
+        {previous != null && <span className="sr-only"> changed to </span>}
         {previous != null && <span aria-hidden className="px-1 text-[var(--tl-faint)]">→</span>}
         <span className="font-semibold">
           {formatInches(record.value)}

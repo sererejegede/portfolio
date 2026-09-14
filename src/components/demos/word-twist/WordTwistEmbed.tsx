@@ -25,9 +25,9 @@
  * shift the page.
  */
 
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
-import { ExternalLink, Loader2, Play, RotateCcw } from 'lucide-react';
+import { ExternalLink, Loader2, Play, Square } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import WordTwistScreenshot from '@/assets/word-twist.png';
 
@@ -58,16 +58,37 @@ const quietControl = cn(
 );
 
 export default function WordTwistEmbed({ className }: { className?: string }) {
-  // 0 = not started. Play and Restart both bump it, and it doubles as the
-  // iframe's key, so a restart is a genuinely fresh load of the game.
-  const [session, setSession] = useState(0);
+  const [playing, setPlaying] = useState(false);
   const [loaded, setLoaded] = useState(false);
-  const started = session > 0;
+  const playButtonRef = useRef<HTMLButtonElement>(null);
+  // Set only by End game, so focus returns to Play after an explicit end but is
+  // never pulled there on first render.
+  const returnFocusToPlay = useRef(false);
 
-  const start = () => {
+  const play = () => {
     setLoaded(false);
-    setSession((n) => n + 1);
+    setPlaying(true);
   };
+
+  /**
+   * There is deliberately no restart control: Word Twist already offers its own
+   * "Play Again" at the end of every game. What the page can add is a way OUT.
+   * Unmounting the iframe is the only way to stop the game's clock from outside,
+   * since a cross-origin page cannot be paused. Ending returns to the Play state,
+   * and pressing Play again loads a genuinely fresh game.
+   */
+  const end = () => {
+    returnFocusToPlay.current = true;
+    setPlaying(false);
+  };
+
+  useEffect(() => {
+    if (!playing && returnFocusToPlay.current) {
+      returnFocusToPlay.current = false;
+      // The End button that held focus has just unmounted along with the game.
+      playButtonRef.current?.focus();
+    }
+  }, [playing]);
 
   return (
     <div className={cn('w-full max-w-[560px]', className)}>
@@ -78,10 +99,9 @@ export default function WordTwistEmbed({ className }: { className?: string }) {
           EMBED_BOX,
         )}
       >
-        {started ? (
+        {playing ? (
           <>
             <iframe
-              key={session}
               src={WORD_TWIST_URL}
               title="Word Twist, a playable word game"
               className="h-full w-full"
@@ -126,8 +146,9 @@ export default function WordTwistEmbed({ className }: { className?: string }) {
             />
             <div className="relative flex h-full flex-col items-center justify-center gap-4 p-6 text-center">
               <button
+                ref={playButtonRef}
                 type="button"
-                onClick={start}
+                onClick={play}
                 className={cn(
                   'inline-flex items-center gap-2 rounded-md bg-primary px-6 py-3 font-medium text-primary-foreground shadow-md transition-colors hover:bg-primary/90',
                   focusRing,
@@ -146,13 +167,13 @@ export default function WordTwistEmbed({ className }: { className?: string }) {
         )}
       </div>
 
-      {/* The link is always present, so Restart appearing beside it after the
-          first play changes nothing about this row's height. */}
+      {/* The link is always present, so End game appearing beside it while a
+          game is running changes nothing about this row's height. */}
       <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
-        {started && (
-          <button type="button" onClick={start} className={quietControl}>
-            <RotateCcw aria-hidden className="h-3.5 w-3.5" />
-            Restart game
+        {playing && (
+          <button type="button" onClick={end} className={quietControl}>
+            <Square aria-hidden className="h-3.5 w-3.5" />
+            End game
           </button>
         )}
         <a

@@ -12,6 +12,7 @@
 
 import { useMemo, useState } from 'react';
 import { MotionConfig } from 'motion/react';
+import WordTwistEmbed from '@/components/demos/word-twist/WordTwistEmbed';
 import { DemoFrameSkeleton } from '@/components/demos/frame-shell';
 import { RAIL_TITLE } from '@/components/demos/tailors-ledger/demo-meta';
 import DemoFrame, { useDemoStageState } from '@/components/demos/DemoFrame';
@@ -49,6 +50,15 @@ export default function DemoLabPage() {
   return (
     <main className="container mx-auto max-w-screen-xl space-y-16 px-4 py-16">
       <DemoSection />
+
+      <hr className="border-border" />
+      <section>
+        <h2 className="mb-1 font-headline text-2xl">Word Twist — iframe embed</h2>
+        <p className="mb-6 text-sm text-muted-foreground">
+          Standalone, not on DemoFrame. Click to play; nothing loads before that.
+        </p>
+        <WordTwistEmbed />
+      </section>
 
       <hr className="border-border" />
       <SkeletonParity />

@@ -15,21 +15,20 @@
  *     two-column grid would strand the game beside an empty column.
  *   - Cost. The frame's stage hook imports Framer Motion; this animates nothing.
  *
- * CLICK TO PLAY. The game starts its clock the moment its page loads and scores
- * each word as `max(10, 100 - seconds)` by wall-clock time, which a parent page
- * cannot pause across origins. So nothing loads until the visitor presses Play:
- * every word is scored fairly, nothing runs off-screen (brief §8), and the
- * iframe costs the portfolio's first load nothing until someone opts in.
+ * NO PLAY GATE. This used to hide the iframe behind a Play button, because the
+ * game started its clock the moment its page loaded. Since word-twist 09b7b28
+ * ("start on click") the game waits on its own start screen, so a portfolio
+ * Play button would only be a second Play in front of the first. The End game
+ * control went with it: it existed to stop that clock and return to Play.
  *
- * The placeholder and the iframe occupy the same fixed box, so the swap cannot
- * shift the page.
+ * The iframe is still lazy. It sits well below the fold, and `loading="lazy"`
+ * keeps every portfolio visit from fetching a whole second Next.js app until
+ * the visitor scrolls near it.
  */
 
-import { useEffect, useRef, useState } from 'react';
-import Image from 'next/image';
-import { ExternalLink, Loader2, Play, Square } from 'lucide-react';
+import { useState } from 'react';
+import { ExternalLink, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import WordTwistScreenshot from '@/assets/word-twist.png';
 
 export const WORD_TWIST_URL = 'https://word-twist.sererejegede.dev';
 
@@ -43,9 +42,9 @@ const EMBED_BOX = 'h-[540px] w-full';
 /**
  * The game's own page background, from its globals.css (`:root --background:
  * 0 0% 11.8%`, i.e. #1E1E1E). Word Twist has no light theme — no ThemeProvider,
- * no `.dark` block — so the iframe is always this colour. Painting the idle and
- * loading states to match means pressing Play does not flash a white card to
- * dark grey in the portfolio's light mode, and the box previews the game.
+ * no `.dark` block — so the iframe is always this colour. Painting the box and
+ * its loading state to match means no white card flashes to dark grey in the
+ * portfolio's light mode.
  */
 const GAME_BACKGROUND = 'bg-[#1E1E1E]';
 
@@ -58,37 +57,7 @@ const quietControl = cn(
 );
 
 export default function WordTwistEmbed({ className }: { className?: string }) {
-  const [playing, setPlaying] = useState(false);
   const [loaded, setLoaded] = useState(false);
-  const playButtonRef = useRef<HTMLButtonElement>(null);
-  // Set only by End game, so focus returns to Play after an explicit end but is
-  // never pulled there on first render.
-  const returnFocusToPlay = useRef(false);
-
-  const play = () => {
-    setLoaded(false);
-    setPlaying(true);
-  };
-
-  /**
-   * There is deliberately no restart control: Word Twist already offers its own
-   * "Play Again" at the end of every game. What the page can add is a way OUT.
-   * Unmounting the iframe is the only way to stop the game's clock from outside,
-   * since a cross-origin page cannot be paused. Ending returns to the Play state,
-   * and pressing Play again loads a genuinely fresh game.
-   */
-  const end = () => {
-    returnFocusToPlay.current = true;
-    setPlaying(false);
-  };
-
-  useEffect(() => {
-    if (!playing && returnFocusToPlay.current) {
-      returnFocusToPlay.current = false;
-      // The End button that held focus has just unmounted along with the game.
-      playButtonRef.current?.focus();
-    }
-  }, [playing]);
 
   return (
     <div className={cn('w-full max-w-[560px]', className)}>
@@ -99,83 +68,39 @@ export default function WordTwistEmbed({ className }: { className?: string }) {
           EMBED_BOX,
         )}
       >
-        {playing ? (
-          <>
-            <iframe
-              src={WORD_TWIST_URL}
-              title="Word Twist, a playable word game"
-              className="h-full w-full"
-              // Same-origin is kept so the game's own scripts and requests behave
-              // exactly as they do on its own domain. Together with allow-scripts
-              // that would let a framed page lift its own sandbox, which matters
-              // for untrusted content — this is the portfolio owner's own site.
-              sandbox="allow-scripts allow-same-origin allow-forms"
-              onLoad={(event) => {
-                setLoaded(true);
-                // The Play button that held focus is gone. Hand focus to the game
-                // so a keyboard user is not dropped back at the top of the page.
-                event.currentTarget.focus({ preventScroll: true });
-              }}
-            />
-            {!loaded && (
-              <div
-                role="status"
-                className={cn(
-                  'absolute inset-0 flex flex-col items-center justify-center gap-3',
-                  GAME_BACKGROUND,
-                )}
-              >
-                <Loader2
-                  aria-hidden
-                  className="h-8 w-8 animate-spin text-primary motion-reduce:animate-none"
-                />
-                <span className="text-sm text-white/70">Loading Word Twist…</span>
-              </div>
+        <iframe
+          src={WORD_TWIST_URL}
+          title="Word Twist, a playable word game"
+          className="h-full w-full"
+          loading="lazy"
+          // Same-origin is kept so the game's own scripts and requests behave
+          // exactly as they do on its own domain. Together with allow-scripts
+          // that would let a framed page lift its own sandbox, which matters
+          // for untrusted content — this is the portfolio owner's own site.
+          sandbox="allow-scripts allow-same-origin allow-forms"
+          // Focus is deliberately NOT moved into the game on load. With no Play
+          // click to hand it over, that would yank focus into a below-the-fold
+          // iframe the moment it finished loading.
+          onLoad={() => setLoaded(true)}
+        />
+        {!loaded && (
+          <div
+            role="status"
+            className={cn(
+              'absolute inset-0 flex flex-col items-center justify-center gap-3',
+              GAME_BACKGROUND,
             )}
-          </>
-        ) : (
-          <>
-            {/* The real screenshot, dimmed, so the idle box reads as the game
-                rather than an empty rectangle. Decorative: alt is empty. */}
-            <Image
-              src={WordTwistScreenshot}
-              alt=""
-              fill
-              sizes="560px"
-              className="object-contain opacity-25"
+          >
+            <Loader2
+              aria-hidden
+              className="h-8 w-8 animate-spin text-primary motion-reduce:animate-none"
             />
-            <div className="relative flex h-full flex-col items-center justify-center gap-4 p-6 text-center">
-              <button
-                ref={playButtonRef}
-                type="button"
-                onClick={play}
-                className={cn(
-                  'inline-flex items-center gap-2 rounded-md bg-primary px-6 py-3 font-medium text-primary-foreground shadow-md transition-colors hover:bg-primary/90',
-                  focusRing,
-                  // The box is always dark, so offset the ring against it rather
-                  // than against the page background it would otherwise use.
-                  'focus-visible:ring-offset-[#1E1E1E]',
-                )}
-              >
-                <Play aria-hidden className="h-4 w-4" />
-                Play Word Twist
-              </button>
-              {/* Always on the game's dark ground, so theme-independent text. */}
-              <p className="text-sm text-white/70">The clock starts when you press Play.</p>
-            </div>
-          </>
+            <span className="text-sm text-white/70">Loading Word Twist…</span>
+          </div>
         )}
       </div>
 
-      {/* The link is always present, so End game appearing beside it while a
-          game is running changes nothing about this row's height. */}
       <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm">
-        {playing && (
-          <button type="button" onClick={end} className={quietControl}>
-            <Square aria-hidden className="h-3.5 w-3.5" />
-            End game
-          </button>
-        )}
         <a
           href={WORD_TWIST_URL}
           target="_blank"
